@@ -251,7 +251,7 @@ public class BluetoothService {
 
     protected void makeDiscoverable(Activity activity){
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,600);
         activity.startActivity(discoverableIntent);
     }
 
