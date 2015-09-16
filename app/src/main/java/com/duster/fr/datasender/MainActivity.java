@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,7 +18,7 @@ public class MainActivity extends Activity {
     private  static final String TAG ="MainActivity";
     private BluetoothService bluetoothService;
     private TextView textView;
-    Button btnD,btnH;
+    Button btnD,btnS,btnC,btnH;
 
     private Handler handler = new Handler(){
         private byte[] readBuf;
@@ -41,8 +42,12 @@ public class MainActivity extends Activity {
 
         btnD = (Button) findViewById(R.id.btnD);
         btnH = (Button) findViewById(R.id.btnH);
+        btnS = (Button) findViewById(R.id.btnS);
+        btnC = (Button) findViewById(R.id.btnC);
         bluetoothService = new BluetoothService(handler,this);
         textView = (TextView) findViewById(R.id.textView);
+
+
     }
 
     @Override

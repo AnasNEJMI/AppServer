@@ -16,13 +16,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Make Discoverable"/>
+            android:text="Discoverable"/>
+        <Button
+            android:id="@+id/btnS"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Send"/>
+        <Button
+            android:id="@+id/btnC"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Change"/>
+
         <Button
             android:id="@+id/btnH"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Make Hidden"/>
+            android:text="Hidden"/>
 
     </LinearLayout>
     <TextView
