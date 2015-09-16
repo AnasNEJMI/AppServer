@@ -3,6 +3,7 @@ package com.duster.fr.datasender;
 import android.app.Activity;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,13 +13,13 @@ import android.widget.TextView;
 
 import android.os.Handler;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
 
     private  static final String TAG ="MainActivity";
     private BluetoothService bluetoothService;
     private TextView textView;
-    Button btnD,btnS,btnC,btnH;
+    //Button btnD,btnS,btnC,btnH;
 
     private Handler handler = new Handler(){
         private byte[] readBuf;
@@ -40,10 +41,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnD = (Button) findViewById(R.id.btnD);
+        /*btnD = (Button) findViewById(R.id.btnD);
         btnH = (Button) findViewById(R.id.btnH);
         btnS = (Button) findViewById(R.id.btnS);
-        btnC = (Button) findViewById(R.id.btnC);
+        btnC = (Button) findViewById(R.id.btnC);*/
         bluetoothService = new BluetoothService(handler,this);
         textView = (TextView) findViewById(R.id.textView);
 
@@ -72,6 +73,9 @@ public class MainActivity extends Activity {
             case  R.id.action_make_discoverable:
                 bluetoothService.makeDiscoverable(this);
                 bluetoothService.accept();
+                return true;
+            case  R.id.action_make_hidden:
+                bluetoothService.stop();
                 return true;
 
             case  R.id.action_send:

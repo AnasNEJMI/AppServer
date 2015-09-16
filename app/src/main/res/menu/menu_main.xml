@@ -20,5 +20,9 @@
         android:title="@string/action_make_discoverable"
         android:orderInCategory="99"
         app:showAsAction="never" />
+    <item android:id="@+id/action_make_hidden"
+        android:title="@string/action_make_hidden"
+        android:orderInCategory="99"
+        app:showAsAction="never" />
 
 </menu>

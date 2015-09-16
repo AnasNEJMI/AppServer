@@ -8,12 +8,18 @@ import java.nio.ByteBuffer;
 public class DataBuilder {
 
     private static final String TAG = "DataBuilder";
-    private static final int SENSOR_NUMBER = 91; // the number of sensors is to be dynamically setup
+    private int SENSOR_NUMBER = 91; // the number of sensors is to be dynamically setup
     private static final int OVER_HEAD = 7;
 
     private int type;
     private ByteBuffer buffer;
     private byte[] bytes;
+
+    /* Setter of SENSOR_NUMBER */
+    public void  setSensor_number(int sn){
+        SENSOR_NUMBER = sn;
+
+    }
 
 
     public DataBuilder(){
