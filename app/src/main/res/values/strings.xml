@@ -5,8 +5,8 @@
     <string name="action_settings">Settings</string>
 
 
-    <string name="action_make_discoverable">Make discoverable</string>
-    <string name="action_make_hidden">Make Hidden</string>
+    <string name="action_make_discoverable">Allow BT connection</string>
+    <string name="action_make_hidden">Stop BT connection</string>
     <string name="action_send">Send</string>
     <string name="action_change">Change</string>
 
