@@ -19,6 +19,7 @@ public class MainActivity extends ActionBarActivity {
     private  static final String TAG ="MainActivity";
     private BluetoothService bluetoothService;
     TextView textView;
+    TextView number_sensors_requested;
     Button sendData;
     final DataBuilder dataBuilder = new DataBuilder();
 
@@ -30,6 +31,7 @@ public class MainActivity extends ActionBarActivity {
             if(msg.what==0){
                 readBuf = (byte[]) msg.obj;
                 String data = new String(readBuf);
+                number_sensors_requested.setText(data);
                 dataBuilder.setSensor_number(Integer.parseInt(data));
                 Log.i(TAG, "message received =" + new String(readBuf,0,msg.arg1));
             }
@@ -49,6 +51,16 @@ public class MainActivity extends ActionBarActivity {
         bluetoothService = new BluetoothService(handler,this);
         textView = (TextView) findViewById(R.id.textView);
         sendData = (Button) findViewById(R.id.sendData);
+        number_sensors_requested = (TextView) findViewById(R.id.number_sensors_requested);
+        sendData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*send data to client app*/
+            }
+        });
+
+
+
 
     }
 
