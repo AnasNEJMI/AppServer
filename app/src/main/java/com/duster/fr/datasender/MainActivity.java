@@ -18,7 +18,10 @@ public class MainActivity extends ActionBarActivity {
 
     private  static final String TAG ="MainActivity";
     private BluetoothService bluetoothService;
-    private TextView textView;
+    TextView textView;
+    Button sendData;
+    final DataBuilder dataBuilder = new DataBuilder();
+
     //Button btnD,btnS,btnC,btnH;
 
     private Handler handler = new Handler(){
@@ -26,6 +29,8 @@ public class MainActivity extends ActionBarActivity {
         public void handleMessage(Message msg){
             if(msg.what==0){
                 readBuf = (byte[]) msg.obj;
+                String data = new String(readBuf);
+                dataBuilder.setSensor_number(Integer.parseInt(data));
                 Log.i(TAG, "message received =" + new String(readBuf,0,msg.arg1));
             }
 
@@ -41,13 +46,9 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*btnD = (Button) findViewById(R.id.btnD);
-        btnH = (Button) findViewById(R.id.btnH);
-        btnS = (Button) findViewById(R.id.btnS);
-        btnC = (Button) findViewById(R.id.btnC);*/
         bluetoothService = new BluetoothService(handler,this);
         textView = (TextView) findViewById(R.id.textView);
-
+        sendData = (Button) findViewById(R.id.sendData);
 
     }
 
@@ -79,10 +80,11 @@ public class MainActivity extends ActionBarActivity {
                 return true;
 
             case  R.id.action_send:
-                bluetoothService.change();
+                bluetoothService.sendOrStop();
                 return true;
 
             case  R.id.action_change:
+                bluetoothService.change();
                 return true;
 
         }
