@@ -9,10 +9,12 @@ import java.io.OutputStream;
 import java.util.UUID;
 //import java.util.logging.Handler;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.os.Message;
 import android.util.Log;
 
 /**
@@ -21,7 +23,17 @@ import android.util.Log;
 public class BluetoothService {
 
     private static final String TAG = "BluetoothService";
+    private static final boolean DEBUG = true;
     protected static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    private int mState;
+
+    //To indicate the state of the current connection
+    public static final int STATE_NONE = 0;       // nothing is done
+    public static final int STATE_LISTEN = 1;     // currently listening for incoming connections
+    public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
+    public static final int STATE_CONNECTED = 3;  // now connected to a remote device
+
 
     private final BluetoothAdapter mAdapter;
     private Handler mHandler;
@@ -38,6 +50,14 @@ public class BluetoothService {
         this.activity = activity;
     }
 
+    private synchronized void setState(int state){
+        if(DEBUG) Log.d(TAG, "setState" + mState +"-->"+state);
+        mState=state;
+    }
+
+    public synchronized int getState(){
+        return mState;
+    }
 
     public synchronized void stop() {
         Log.d(TAG, "stop");
@@ -134,6 +154,17 @@ public class BluetoothService {
         }
     }
 
+    private void connectionLost(){
+        setState(STATE_LISTEN);
+
+        // send failure message back to the UI Activity
+
+        Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_TOAST);
+        Bundle bundle = new Bundle();
+        bundle.putString(MainActivity.TOAST,"The connection with the device was last");
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
+    }
     private class ConnectedThread extends Thread {
 
         private static final String TAG = "ConnectedThread";
@@ -163,17 +194,25 @@ public class BluetoothService {
         }
 
         public void run() {
+            Log.i(TAG,"Begin mConnected");
             int bytes =0;
-            byte[] buffer = new byte[500];
+            byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
-            while(running){
+            while(true){
                 try{
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+
+                    bytes = mmInStream.read(buffer);
+
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                } catch (IOException e) {
+                    Log.e(TAG,"disconnected",e);
+                    connectionLost();
+                    break;
+
+
                 }
-                try {
+                /*try {
                     bytes = mmInStream.available();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -205,7 +244,7 @@ public class BluetoothService {
                             activity.printValue(100000);
                         }
                     });
-                }
+                }*/
 
             }
 

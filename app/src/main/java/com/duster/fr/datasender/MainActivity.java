@@ -9,22 +9,74 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import android.os.Handler;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
+    // for Debuging purposes
+    private static final String TAG = "MainActivity";
+    private static final boolean DEBUG = true;
 
-    private  static final String TAG ="MainActivity";
+    // Message types sent from BlutoothService handler
+    public static final int MESSAGE_STATE_CHANGE = 1;
+    public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+
+    //Key names received from BlutoothService handler
+    public static final String DEVICE_NAME = "device_name";
+    public static final String TOAST = "toast";
+
+    private String mConnectedDeviceName = null;
     private BluetoothService bluetoothService;
+
+
+    //Layouts
     private TextView textView;
 
-    private Handler handler = new Handler(){
-        private byte[] readBuf;
-        public void handleMessage(Message msg){
-            if(msg.what==0){
-                readBuf = (byte[]) msg.obj;
-                Log.i(TAG, "message received =" + new String(readBuf,0,msg.arg1));
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_STATE_CHANGE:
+                    if(DEBUG) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                    switch (msg.arg1) {
+                        case BluetoothService.STATE_CONNECTED:
+                            /***********/
+                            break;
+                        case BluetoothService.STATE_CONNECTING:
+                            /***********/
+                            break;
+                        case BluetoothService.STATE_LISTEN:
+                        case BluetoothService.STATE_NONE:
+                            /**********/
+                            break;
+                    }
+                    break;
+                case MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // construct a string from the buffer
+                    String writeMessage = new String(writeBuf);
+                    textView.setText(writeMessage);
+                    break;
+                case MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    // construct a string from the valid bytes in the buffer
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
+                    break;
+                case MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                    Toast.makeText(getApplicationContext(), "Connected to "
+                            + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    break;
+                case MESSAGE_TOAST:
+                    Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                            Toast.LENGTH_SHORT).show();
+                    break;
             }
-
         }
     };
 
@@ -37,7 +89,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bluetoothService = new BluetoothService(handler,this);
+        bluetoothService = new BluetoothService(mHandler,this);
         textView = (TextView) findViewById(R.id.textView);
     }
 
