@@ -222,6 +222,15 @@ public class BluetoothService {
 
         }
 
+        public void read(byte[] bytes){
+            try {
+                mmInStream.read(bytes);
+            }catch (IOException e){
+                Log.e("Reading", "Unable to read data on the stream", e);
+            }
+        }
+
+
         public void change(){
             dataBuilder.changeType();
         }
