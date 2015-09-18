@@ -122,6 +122,7 @@ public class BluetoothService {
             if (mbtSocket!=null){
                 BluetoothService.this.Connected(mbtSocket);
             }
+
         }
 
         public void cancel(){
@@ -221,6 +222,8 @@ public class BluetoothService {
             }
 
         }
+
+
 
         public void change(){
             dataBuilder.changeType();
