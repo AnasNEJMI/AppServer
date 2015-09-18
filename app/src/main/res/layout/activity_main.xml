@@ -19,12 +19,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="20dp"
+                android:layout_weight="1"
                 android:text="Number of sensors requested"/>
 
             <TextView
                 android:id="@+id/number_sensors_requested"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:paddingBottom="20dp" />
         </LinearLayout>
 
