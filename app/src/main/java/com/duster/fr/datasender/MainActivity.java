@@ -35,6 +35,8 @@ public class MainActivity extends ActionBarActivity {
     private String mConnectedDeviceName = null;
     private BluetoothService bluetoothService;
 
+    private DataBuilder dataBuilder = new DataBuilder();
+
 
     //Layouts
     private TextView textView;
@@ -68,6 +70,9 @@ public class MainActivity extends ActionBarActivity {
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
+                    dataBuilder.setSensorNumber(Integer.parseInt(readMessage));
+                    if(DEBUG)Log.d(TAG,"Message read");
+                    Toast.makeText(getApplicationContext(),"message Read",Toast.LENGTH_SHORT).show();
                     textView.setText(readMessage);
                     break;
                 case MESSAGE_DEVICE_NAME:
