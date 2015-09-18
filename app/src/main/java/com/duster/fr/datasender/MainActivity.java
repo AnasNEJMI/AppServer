@@ -1,8 +1,10 @@
 package com.duster.fr.datasender;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +15,7 @@ import android.widget.TextView;
 import android.os.Handler;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
     // for Debuging purposes
     private static final String TAG = "MainActivity";
