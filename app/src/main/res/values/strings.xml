@@ -1,11 +1,12 @@
 <resources>
-    <string name="app_name">DataSender</string>
+    <string name="app_name">InsoleSimulator</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
 
-    <string name="action_make_discoverable">Make discoverable</string>
+    <string name="action_make_discoverable">enable BT connection</string>
+    <string name="action_make_hidden">stop BT availability</string>
     <string name="action_send">Send</string>
     <string name="action_change">Change</string>
 

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import android.os.Handler;
@@ -91,6 +93,7 @@ public class MainActivity extends Activity {
 
         bluetoothService = new BluetoothService(mHandler,this);
         textView = (TextView) findViewById(R.id.textView);
+
     }
 
     @Override
@@ -108,19 +111,23 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }else if(id == R.id.action_make_discoverable) {
-            bluetoothService.makeDiscoverable(this);
-            bluetoothService.accept();
-            return true;
-        }else if(id == R.id.action_send){
-            bluetoothService.sendOrStop();
-            return true;
+        switch (item.getItemId()){
+            case  R.id.action_settings:
+                return true;
 
-        }else if(id == R.id.action_change){
-            bluetoothService.change();
-            return true;
+            case  R.id.action_make_discoverable:
+                bluetoothService.makeDiscoverable(this);
+                bluetoothService.accept();
+                return true;
+
+            case  R.id.action_send:
+                bluetoothService.sendOrStop();
+                return true;
+
+            case  R.id.action_change:
+                bluetoothService.change();
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
