@@ -125,6 +125,14 @@ public class BluetoothService {
         if(mConnectedThread!=null){mConnectedThread.change();}
     }
 
+    public void sleep(int t){
+        try {
+            Thread.sleep(t);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private class AcceptThread extends Thread {
         private static final String TAG = "AcceptThread";
 
@@ -298,6 +306,8 @@ public class BluetoothService {
         public void change(){
             dataBuilder.changeType();
         }
+
+
 
         public void cancel() {
             Log.i(TAG, "cancel Thread");

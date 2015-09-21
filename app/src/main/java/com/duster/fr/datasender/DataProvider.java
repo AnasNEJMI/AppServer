@@ -1,5 +1,7 @@
 package com.duster.fr.datasender;
 
+import java.util.Random;
+
 /**
  * Created by Anas on 21/09/2015.
  */
@@ -18,10 +20,14 @@ public class DataProvider {
     private int dataType;
 
     // for sending or aborting
-    private boolean send;
+    private volatile boolean send=true;
 
     //for data (in bytes)
     byte[] data;
+
+    // Random variable
+
+    Random rand = new Random();
 
     public DataProvider(int sensorNbr, int frq, int type) {
         this.frequency = frq;
@@ -53,10 +59,30 @@ public class DataProvider {
 
     }
 
+    /*--For DataType--*/
+    public  void setDataType(int type){
+        dataType = type;
+
+    }
+
+    public  int getDataType(){
+        return dataType;
+
+    }
+
+    /*--For Send--*/
+    public  void abortSend(){
+        send =!send;
+    }
+
+    public  boolean getSend(){
+        return send;
+
+    }
+
 
     public byte[] getData(){
 
-        for(int i =0; i<frequency;i++){
             data = new byte[sensorNumber];
             switch(dataType){
                 case 0:
@@ -64,11 +90,14 @@ public class DataProvider {
                         data[j] = 5;
                     }
                 case 1:
+                    for (int j = 0; j< sensorNumber; j++) {
+                        data[j] = 4;
+                    }
                 case 2:
-                case 3:
+                    for (int j = 0; j< sensorNumber; j++) {
+                        data[j] = 3;
+                    }
             }
-
-        }
         return data;
     }
 

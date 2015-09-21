@@ -135,40 +135,76 @@ public class MainActivity extends ActionBarActivity {
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
 
+                if (messageF.isEmpty() || messageS.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensor and the frequency ", Toast.LENGTH_SHORT).show();
+                } else {
+                    int sensorNbr = Integer.parseInt(messageS);
+                    final int frq = Integer.parseInt(messageF);
 
-                int sensorNbr = Integer.parseInt(messageS);
-                int frq = Integer.parseInt(messageF);
+                    dataProvider = new DataProvider(sensorNbr, frq, 0);
 
-                dataProvider = new DataProvider(sensorNbr,frq,0);
 
-                // check if the values entered are integers
-                try {
-                    int num = Integer.parseInt(messageS);
-                    Log.i("",num+" is a number");
-                } catch (NumberFormatException e) {
-                    Log.i("",messageS+"is not a number");
-                    Toast.makeText(getApplicationContext(),"the number of sensors should be a number",Toast.LENGTH_SHORT);
+                    Thread loop = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int d = 0;
+                            while (true) {
+
+                                while (dataProvider.getSend() == true) {
+                                    String message = Arrays.toString(dataProvider.getData());
+                                    //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                                    message += d;
+                                    d++;
+                                    sendMessage(message);
+                                    bluetoothService.sleep(1000 / frq);
+                                    //int dt = dataProvider.getDataType();
+                                    // if(dt ==3){ dataProvider.setDataType(0);}
+                                    //else{dataProvider.setDataType(dt+1);}
+
+                                }
+                            }
+                        }
+                    });
+                    loop.start();
+
+
+                    // check if the values entered are integers
+                    try {
+                        int num = Integer.parseInt(messageS);
+                        Log.i("", num + " is a number");
+                    } catch (NumberFormatException e) {
+                        Log.i("", messageS + "is not a number");
+                        Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
+                    }
+
+                    try {
+                        int num = Integer.parseInt(messageF);
+                        Log.i("", num + " is a number");
+                    } catch (NumberFormatException e) {
+                        Log.i("", messageF + "is not a number");
+                        Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
+                    }
+
+                    // send data if connected
+
+
+                    // clear EditTexts
+                    sensorNumber.setText("");
+                    frequency.setText("");
+                    //sendMessage(messageS);
+                    //sendMessage(messageF);
+
                 }
+            }
+        });
 
-                try {
-                    int num = Integer.parseInt(messageF);
-                    Log.i("",num+" is a number");
-                } catch (NumberFormatException e) {
-                    Log.i("",messageF+"is not a number");
-                    Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
-                }
+        abort = (Button) findViewById(R.id.abortBtn);
+        abort.setBackgroundResource(R.drawable.abort_selector);
 
-                // send data if connected
-                String message = Arrays.toString(dataProvider.getData());
-                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
-                sendMessage(message);
-
-                // clear EditTexts
-                sensorNumber.setText("");
-                frequency.setText("");
-                //sendMessage(messageS);
-                //sendMessage(messageF);
-
+        abort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dataProvider.abortSend();
             }
         });
 
