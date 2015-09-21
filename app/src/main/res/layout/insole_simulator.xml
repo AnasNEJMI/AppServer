@@ -23,7 +23,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/clientMsg"/>
+                android:id="@+id/clientMsg"
+                android:textColor="#c2e0dd"/>
 
         </LinearLayout>
 
@@ -55,6 +56,7 @@
                     android:layout_weight="1"
                     android:inputType="numberSigned"
                     android:ems="10"
+                    android:textColor="#c2e0dd"
                     android:id="@+id/editSensorNumber"
                     android:hint="Number of sensors"
                     android:gravity="center"
@@ -83,6 +85,7 @@
                     android:layout_height="match_parent"
                     android:inputType="numberSigned"
                     android:ems="10"
+                    android:textColor="#c2e0dd"
                     android:id="@+id/editFrequency"
                     android:hint="Frequency"
                     android:gravity="center"

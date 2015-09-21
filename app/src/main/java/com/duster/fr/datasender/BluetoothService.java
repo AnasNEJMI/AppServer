@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 //import java.util.logging.Handler;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -98,12 +99,19 @@ public class BluetoothService {
 
     /*Starting the tread to manage the connection and enable transmissions*/
 
-    public synchronized void Connected(BluetoothSocket socket) {
+    public synchronized void Connected(BluetoothSocket socket,BluetoothDevice device) {
         Log.d(TAG, "connected");
         stop();
 
         mConnectedThread = new ConnectedThread(socket, mHandler);
         mConnectedThread.start();
+        Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
+        Bundle bundle = new Bundle();
+        bundle.putString(MainActivity.DEVICE_NAME, device.getName());
+        msg.setData(bundle);
+        mHandler.sendMessage(msg);
+        setState(STATE_CONNECTED);
+
     }
 
     public boolean sendOrStop(){
@@ -156,7 +164,7 @@ public class BluetoothService {
             }
 
             if (mbtSocket!=null){
-                BluetoothService.this.Connected(mbtSocket);
+                BluetoothService.this.Connected(mbtSocket,mbtSocket.getRemoteDevice());
             }
         }
 
@@ -228,12 +236,12 @@ public class BluetoothService {
 
 
                 }
-                /*try {
+                try {
                     bytes = mmInStream.available();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if(bytes >0){
+                /*if(bytes >0){
                     try {
                         mmInStream.read(buffer,0,bytes);
                     } catch (IOException e) {

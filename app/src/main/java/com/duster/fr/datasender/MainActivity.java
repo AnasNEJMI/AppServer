@@ -59,6 +59,10 @@ public class MainActivity extends ActionBarActivity {
                     if(DEBUG) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
+                            mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                            Toast.makeText(getApplicationContext(), "Connected to "
+                                    + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             /***********/
@@ -73,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    textView.setText(writeMessage);
+                    //textView.setText(writeMessage);
                     break;
                 case MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
@@ -122,6 +126,10 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
+
+                // clear EditTexts
+                sensorNumber.setText("");
+                frequency.setText("");
                 sendMessage(messageS);
                 sendMessage(messageF);
 
