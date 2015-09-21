@@ -23,15 +23,10 @@ public class DataProvider {
     //for data (in bytes)
     byte[] data;
 
-
-
-    // Constructor
-
-    public void DataProvider(int sensorNbr,int frq, int type){
-        this.frequency=frq;
-        this.sensorNumber=sensorNbr;
-        this.dataType=type;
-
+    public DataProvider(int sensorNbr, int frq, int type) {
+        this.frequency = frq;
+        this.sensorNumber = sensorNbr;
+        this.dataType = type;
     }
 
     // Setters and getters
@@ -59,14 +54,14 @@ public class DataProvider {
     }
 
 
-    public byte[] getData(int sensorNumber, int frequency, int dataType){
+    public byte[] getData(){
 
         for(int i =0; i<frequency;i++){
             data = new byte[sensorNumber];
             switch(dataType){
                 case 0:
-                    for (int j = 0; i < sensorNumber; j++) {
-                        data[i] = 5;
+                    for (int j = 0; j< sensorNumber; j++) {
+                        data[j] = 5;
                     }
                 case 1:
                 case 2:

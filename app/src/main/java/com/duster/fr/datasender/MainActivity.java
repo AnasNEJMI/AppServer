@@ -18,6 +18,8 @@ import android.widget.TextView;
 import android.os.Handler;
 import android.widget.Toast;
 
+import java.util.Arrays;
+
 public class MainActivity extends ActionBarActivity {
 
     // for Debuging purposes
@@ -50,6 +52,10 @@ public class MainActivity extends ActionBarActivity {
     private  Button abort;
     private EditText sensorNumber;
     private EditText frequency;
+
+
+    // DataProvider
+    private DataProvider dataProvider;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -121,17 +127,47 @@ public class MainActivity extends ActionBarActivity {
         send = (Button) findViewById(R.id.sendBtn);
         send.setBackgroundResource(R.drawable.send_selector);
 
+
+
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
 
+
+                int sensorNbr = Integer.parseInt(messageS);
+                int frq = Integer.parseInt(messageF);
+
+                dataProvider = new DataProvider(sensorNbr,frq,0);
+
+                // check if the values entered are integers
+                try {
+                    int num = Integer.parseInt(messageS);
+                    Log.i("",num+" is a number");
+                } catch (NumberFormatException e) {
+                    Log.i("",messageS+"is not a number");
+                    Toast.makeText(getApplicationContext(),"the number of sensors should be a number",Toast.LENGTH_SHORT);
+                }
+
+                try {
+                    int num = Integer.parseInt(messageF);
+                    Log.i("",num+" is a number");
+                } catch (NumberFormatException e) {
+                    Log.i("",messageF+"is not a number");
+                    Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
+                }
+
+                // send data if connected
+                String message = Arrays.toString(dataProvider.getData());
+                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                sendMessage(message);
+
                 // clear EditTexts
                 sensorNumber.setText("");
                 frequency.setText("");
-                sendMessage(messageS);
-                sendMessage(messageF);
+                //sendMessage(messageS);
+                //sendMessage(messageF);
 
             }
         });
