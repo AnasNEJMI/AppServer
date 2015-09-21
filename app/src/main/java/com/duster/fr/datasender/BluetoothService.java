@@ -71,6 +71,22 @@ public class BluetoothService {
         }
 
     }
+    // To write to the ConnectedThread in an unsynchronized manner
+
+    public void write(byte[] outMsg){
+        ConnectedThread r;
+
+        synchronized (this){
+            if (mState!=STATE_CONNECTED) return;
+            r=mConnectedThread;
+        }
+
+        //unsynchronized wrinting
+
+        r.write(outMsg);
+
+
+    }
 
     /* Starting the thread to enable connection to device*/
     public synchronized void accept() {
@@ -125,7 +141,7 @@ public class BluetoothService {
             /* Connection through a socket*/
             try{
                 mbtSocket=mmServerSocket.accept(); // listening to connection requests
-                                                    // not to be used in the main thread ( because it's a blocking call)
+                // not to be used in the main thread ( because it's a blocking call)
                 Log.i(TAG,"connection accepted");
                 mmServerSocket.close(); // Used to not accept additional connections
 
@@ -217,7 +233,6 @@ public class BluetoothService {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 if(bytes >0){
                     try {
                         mmInStream.read(buffer,0,bytes);
@@ -225,7 +240,6 @@ public class BluetoothService {
                         e.printStackTrace();
                     }
                 }
-
                 if(send){
                     write(dataBuilder.getData());
                     if(testInt>100000){
@@ -250,10 +264,13 @@ public class BluetoothService {
 
         }
 
-        public void write(byte[] bytes){
+        public void write(byte[] buffer){
 
             try {
-                mmOutStream.write(bytes);
+                mmOutStream.write(buffer);
+                // Share the sent message back to the UI Activity
+                mHandler.obtainMessage(MainActivity.MESSAGE_WRITE, -1, -1, buffer)
+                        .sendToTarget();
             } catch (IOException e) {
                 Log.e("writing", "unable to write data in the device", e);
                 cancel();
@@ -304,6 +321,3 @@ public class BluetoothService {
     }
 
 }
-
-
-

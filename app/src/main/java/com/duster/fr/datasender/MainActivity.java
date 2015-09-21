@@ -2,6 +2,8 @@ package com.duster.fr.datasender;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Message;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import android.os.Handler;
@@ -32,6 +35,9 @@ public class MainActivity extends ActionBarActivity {
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
+    //String buffer for outgoing messages
+    private StringBuffer mOutStringBuffer = new StringBuffer();
+
     private String mConnectedDeviceName = null;
     private BluetoothService bluetoothService;
 
@@ -40,6 +46,10 @@ public class MainActivity extends ActionBarActivity {
 
     //Layouts
     private TextView textView;
+    private  Button send;
+    private  Button abort;
+    private EditText sensorNumber;
+    private EditText frequency;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -49,7 +59,6 @@ public class MainActivity extends ActionBarActivity {
                     if(DEBUG) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            /***********/
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             /***********/
@@ -96,13 +105,47 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.insole_simulator);
+        //ActionBar actionBar = getActionBar();
+        //actionBar.setBackgroundDrawable(new ColorDrawable(Color.RED)); // set your desired color
 
         bluetoothService = new BluetoothService(mHandler,this);
-        textView = (TextView) findViewById(R.id.number_sensors_requested);
+        bluetoothService.accept();
+        textView = (TextView) findViewById(R.id.clientMsg);
+        sensorNumber = (EditText) findViewById(R.id.editSensorNumber);
+        frequency = (EditText) findViewById(R.id.editFrequency);
+        send = (Button) findViewById(R.id.sendBtn);
+        send.setBackgroundResource(R.drawable.send_selector);
+
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String messageS = sensorNumber.getText().toString();
+                String messageF = frequency.getText().toString();
+                sendMessage(messageS);
+                sendMessage(messageF);
+
+            }
+        });
 
     }
 
+    private void sendMessage(String message) {
+        // Check that we're actually connected before trying anything
+        if (bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
+            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Check that there's actually something to send
+        if (message.length() > 0) {
+            // Get the message bytes and tell the BluetoothChatService to write
+            byte[] send = message.getBytes();
+            bluetoothService.write(send);
+            // Reset out string buffer to zero and clear the edit text field
+            mOutStringBuffer.setLength(0);
+            //sensorNumber.setText(mOutStringBuffer);
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
