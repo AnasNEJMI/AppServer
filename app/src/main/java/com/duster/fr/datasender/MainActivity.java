@@ -52,10 +52,14 @@ public class MainActivity extends ActionBarActivity {
     private  Button abort;
     private EditText sensorNumber;
     private EditText frequency;
+    private Thread loop;
 
 
     // DataProvider
     private DataProvider dataProvider;
+
+    //Number of data package sent
+    private  int d =0;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -136,7 +140,7 @@ public class MainActivity extends ActionBarActivity {
                 String messageF = frequency.getText().toString();
 
                 if (messageF.isEmpty() || messageS.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensor and the frequency ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequency ", Toast.LENGTH_SHORT).show();
                 } else {
                     int sensorNbr = Integer.parseInt(messageS);
                     final int frq = Integer.parseInt(messageF);
@@ -144,10 +148,9 @@ public class MainActivity extends ActionBarActivity {
                     dataProvider = new DataProvider(sensorNbr, frq, 0);
 
 
-                    Thread loop = new Thread(new Runnable() {
+                    loop = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            int d = 0;
                             while (true) {
 
                                 while (dataProvider.getSend() == true) {
@@ -167,9 +170,11 @@ public class MainActivity extends ActionBarActivity {
                     });
                     loop.start();
 
+                    //if(dataProvider.getSend()==false){loop.interrupt();}
+
 
                     // check if the values entered are integers
-                    try {
+                    /*try {
                         int num = Integer.parseInt(messageS);
                         Log.i("", num + " is a number");
                     } catch (NumberFormatException e) {
@@ -183,7 +188,7 @@ public class MainActivity extends ActionBarActivity {
                     } catch (NumberFormatException e) {
                         Log.i("", messageF + "is not a number");
                         Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
-                    }
+                    }*/
 
                     // send data if connected
 
@@ -205,6 +210,12 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 dataProvider.abortSend();
+                d=0;
+                if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
+                loop.interrupt();
+                if(DEBUG){Log.d(TAG,"Trying Interruption successful");}
+
+
             }
         });
 
