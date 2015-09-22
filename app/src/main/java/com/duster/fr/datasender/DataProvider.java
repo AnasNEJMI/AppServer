@@ -1,5 +1,7 @@
 package com.duster.fr.datasender;
 
+import android.util.Log;
+
 import java.util.Random;
 
 /**
@@ -10,7 +12,7 @@ public class DataProvider {
 
     // for Debugging purposes
     private static final String TAG = "DataProvider";
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
 
     //Number of sensors and frequency of transfer
     private int sensorNumber;
@@ -84,20 +86,25 @@ public class DataProvider {
     public byte[] getData(){
 
             data = new byte[sensorNumber];
-            switch(dataType){
-                case 0:
-                    for (int j = 0; j< sensorNumber; j++) {
-                        data[j] = 5;
-                    }
-                case 1:
-                    for (int j = 0; j< sensorNumber; j++) {
-                        data[j] = 4;
-                    }
-                case 2:
-                    for (int j = 0; j< sensorNumber; j++) {
-                        data[j] = 3;
-                    }
+        if(dataType == 1) {
+            Log.i(TAG,"data type ==1");
+            for (int j = 0; j < sensorNumber; j++) {
+                data[j] = (byte) (sensorNumber-j);
             }
+        }else if(dataType == 2) {
+            Log.i(TAG,"data type ==2");
+            for (int j = 0; j< sensorNumber; j++) {
+                data[j] = (byte) j;
+            }
+
+        }else if(dataType==3){
+            Log.i(TAG,"data type ==3");
+            for (int j = 0; j< sensorNumber; j++) {
+                if(j<Math.round(sensorNumber/2)) {data[j] = (byte) j;}
+                else{ data[j] = (byte)(sensorNumber-j);}
+
+            }
+        }
         return data;
     }
 
