@@ -3,6 +3,7 @@ package com.duster.fr.datasender;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Message;
 import android.os.Bundle;
@@ -11,14 +12,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import android.os.Handler;
 import android.widget.Toast;
 
 import java.util.Arrays;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -52,6 +58,20 @@ public class MainActivity extends ActionBarActivity {
     private  Button abort;
     private EditText sensorNumber;
     private EditText frequency;
+    private ProgressBar progressBar;
+    private Spinner data;
+    private TextView typeOfData;
+    private Switch leftRight;
+
+    // For determining which side is the insole
+    private int insoleSide;
+
+
+    // Boolean to not allow abort button to do more than aborting
+    private boolean logic;
+
+
+    // Separate Thread for sending data
     private Thread loop;
 
 
@@ -125,17 +145,34 @@ public class MainActivity extends ActionBarActivity {
 
         bluetoothService = new BluetoothService(mHandler,this);
         bluetoothService.accept();
-        textView = (TextView) findViewById(R.id.clientMsg);
         sensorNumber = (EditText) findViewById(R.id.editSensorNumber);
         frequency = (EditText) findViewById(R.id.editFrequency);
         send = (Button) findViewById(R.id.sendBtn);
         send.setBackgroundResource(R.drawable.send_selector);
 
+        // Setting up the police of "Type of data"
+        typeOfData = (TextView) findViewById(R.id.type_of_data);
+        Typeface typeface = Typeface.createFromAsset(getAssets(),"fonts/Ailerons.ttf");
+        typeOfData.setTypeface(typeface);
 
+        //Setting up the circular progress bar
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+
+        //Setting up the switch that determines which side of the insode
+        leftRight = (Switch) findViewById(R.id.leftRight);
+
+
+        //Setting up the spinner
+        data = (Spinner) findViewById(R.id.data);
+        ArrayAdapter<CharSequence> dataAdapter = ArrayAdapter.createFromResource(this,R.array.data_type,android.R.layout.simple_spinner_item);
+        dataAdapter.setDropDownViewResource(R.layout.spinner_textview);
+        data.setAdapter(dataAdapter);
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                logic = true;
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
 
@@ -143,7 +180,7 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequency ", Toast.LENGTH_SHORT).show();
                 } else {
                     int sensorNbr = Integer.parseInt(messageS);
-                    final int frq = Integer.parseInt(messageF);
+                    int frq = Integer.parseInt(messageF);
 
                     dataProvider = new DataProvider(sensorNbr, frq, 0);
 
@@ -154,12 +191,13 @@ public class MainActivity extends ActionBarActivity {
                             while (true) {
 
                                 while (dataProvider.getSend() == true) {
+                                    int f = dataProvider.getFrequency();
                                     String message = Arrays.toString(dataProvider.getData());
                                     //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
                                     message += d;
                                     d++;
                                     sendMessage(message);
-                                    bluetoothService.sleep(1000 / frq);
+                                    bluetoothService.sleep(1000 / f);
                                     //int dt = dataProvider.getDataType();
                                     // if(dt ==3){ dataProvider.setDataType(0);}
                                     //else{dataProvider.setDataType(dt+1);}
@@ -169,6 +207,7 @@ public class MainActivity extends ActionBarActivity {
                         }
                     });
                     loop.start();
+                    progressBar.setVisibility(View.VISIBLE);
 
                     //if(dataProvider.getSend()==false){loop.interrupt();}
 
@@ -209,11 +248,23 @@ public class MainActivity extends ActionBarActivity {
         abort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dataProvider.abortSend();
+
+                if(logic == true)
+
+                {dataProvider.abortSend();
                 d=0;
                 if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
                 loop.interrupt();
                 if(DEBUG){Log.d(TAG,"Trying Interruption successful");}
+
+                progressBar.setVisibility(View.GONE);
+
+                logic=!logic;
+                }else{
+                    Toast.makeText(getApplicationContext(),"Nothing to abort",Toast.LENGTH_SHORT).show();
+                }
+
+
 
 
             }
