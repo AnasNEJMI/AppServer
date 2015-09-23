@@ -41,4 +41,29 @@ public class OutPutStream extends ByteArrayOutputStream {
 
         return concatByte;
     }
+
+
+    public byte[] concatenateTwoBytes(ByteArrayOutputStream outputStream,byte[] n ,byte[] t ){
+
+        if(DEBUG) Log.i(TAG,"Attempting to concatenate");
+
+        try {
+            outputStream.write(n);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            outputStream.write(t);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] c = outputStream.toByteArray();
+        String concat = Arrays.toString(c);
+        byte[] concatByte = concat.getBytes();
+
+        return concatByte;
+    }
+
+
+
 }

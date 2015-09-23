@@ -125,6 +125,20 @@ public class MainActivity extends ActionBarActivity {
                     if(DEBUG) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
+
+                            /*----------------------------------------------------------*/
+                            /* --- In case connection is established, send a message ---*/
+                            /*----------------------------------------------------------*/
+
+                            numData[0]= (byte) 14;
+                            String response = new String("madm");
+                            byte[] responseBytes = response.getBytes();
+
+                            // Concatenation of the three arrays and sending data
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            byte[] concatByte = outPutStream.concatenateTwoBytes(outputStream,numData,responseBytes);
+                            bluetoothService.write(concatByte);
+
                             mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
                             Toast.makeText(getApplicationContext(), "Connected to "
                                     + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
@@ -143,6 +157,17 @@ public class MainActivity extends ActionBarActivity {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
+
+                    if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED){
+                        numData[0]= (byte) 14;
+                        String response = new String("madm");
+                        byte[] responseBytes = response.getBytes();
+
+                        // Concatenation of the three arrays and sending data
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateTwoBytes(outputStream, numData, responseBytes);
+                        bluetoothService.write(concatByte);
+                    }
                     break;
                 case MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
@@ -303,7 +328,7 @@ public class MainActivity extends ActionBarActivity {
                         //Sending the real data
                         String messageS = sensorNumber.getText().toString();
                         String messageF = frequency.getText().toString();
-                        sendData(messageS,messageF);
+                        sendData(messageS, messageF);
 
                     }
 
@@ -328,6 +353,23 @@ public class MainActivity extends ActionBarActivity {
 
                     }
 
+                    /*----------------------------------------------------------------------*/
+                    /* --- If it is a request is to make the insole enter in a deep sleep-- */
+                    /*----------------------------------------------------------------------*/
+
+                    else if(readMessage.equals("sleep")){
+
+                        if(DEBUG) Log.i(TAG,"attempting to sleep");
+
+                        try {
+                            Thread.currentThread().sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (DEBUG) Log.i(TAG,"Sleep succeeded");
+
+                        Toast.makeText(getApplicationContext(),"The insole slept for 10 seconds",Toast.LENGTH_LONG).show();
+                    }
 
 
 
@@ -400,15 +442,12 @@ public class MainActivity extends ActionBarActivity {
         byte t1 = (byte) Integer.parseInt(dateParts[1]);
         byte t2 = (byte) Integer.parseInt(dateParts[2].substring(0,2));
         byte t3 = (byte) Integer.parseInt(dateParts[2].substring(2,4));
-
-
-
-        Toast.makeText(getApplicationContext(),dateParts[3],Toast.LENGTH_SHORT).show();
         timeStamp[0] = (byte) t0;
         timeStamp[1] = (byte) t1;
         timeStamp[2] = (byte) t2;
         timeStamp[3] = (byte) t3;
 
+        Toast.makeText(getApplicationContext(),"Welcome to the insole simulator",Toast.LENGTH_SHORT).show();
 
 
         // Setting up the police of "Type of data"
@@ -422,8 +461,6 @@ public class MainActivity extends ActionBarActivity {
 
         //Setting up the switch that determines which side of the insole
         leftRight = (ToggleButton) findViewById(R.id.leftRight);
-
-
 
         leftRight.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -587,7 +624,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-    private void sendMessage(String message) {
+    public void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (bluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
