@@ -243,7 +243,7 @@ public class MainActivity extends ActionBarActivity {
                     /*------------------------------------------------------*/
 
                     else if (readMessage.length()==10) {
-                        String t = new String("new_version");
+                        String t = new String("new_name");
                         if(readMessage.toLowerCase().contains(t.toLowerCase())){
 
                             if(readMessage.charAt(8) == (int) readMessage.charAt(8) && readMessage.charAt(9) == (int) readMessage.charAt(9)){
@@ -263,6 +263,10 @@ public class MainActivity extends ActionBarActivity {
                                 bluetoothService.write(concatByte);
 
                                 Toast.makeText(getApplicationContext(),"The name of the insole has been changed to "+newName,Toast.LENGTH_SHORT).show();}
+                        }else{
+                            String unrec = new String("Request unrecognized");
+                            byte[] b = unrec.getBytes();
+                            bluetoothService.write(b);
                         }
 
 
@@ -270,7 +274,7 @@ public class MainActivity extends ActionBarActivity {
                     /* --- If it is a request to the insole to start sending data--- */
                     /*---------------------------------------------------------------*/
 
-                    }else if(readMessage.equals("start")){
+                    }else if(readMessage.equals("start_sending")){
 
                         numData[0]= (byte) 10;
                         String response = new String("start");
@@ -293,7 +297,7 @@ public class MainActivity extends ActionBarActivity {
                     /* --- If it is a request to the insole to stop sending data--- */
                     /*---------------------------------------------------------------*/
 
-                    else if(readMessage.equals("stop")){
+                    else if(readMessage.equals("stop_sending")){
 
                         numData[0]= (byte) 11;
                         String response = new String("stop");
