@@ -8,7 +8,7 @@
 
     <item android:id="@+id/action_send"
         android:title="@string/action_send"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_change"
@@ -17,8 +17,9 @@
         app:showAsAction="never" />
 
     <item android:id="@+id/action_make_discoverable"
+        android:icon="@drawable/enable_bluetooth"
         android:title="@string/action_make_discoverable"
-        android:orderInCategory="99"
-        app:showAsAction="never" />
+        android:orderInCategory="1"
+        app:showAsAction="always" />
 
 </menu>

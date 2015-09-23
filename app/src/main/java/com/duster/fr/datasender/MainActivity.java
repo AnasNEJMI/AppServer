@@ -68,19 +68,29 @@ public class MainActivity extends ActionBarActivity {
     private TextView typeOfData;
     private ToggleButton leftRight;
 
+    //Name of the Insole
+    private TextView NAME;
+    private TextView insoleName;
+    private int nameParam1=1;
+    private int nameParam2=1;
+
 
     // Infos about the insole
-    private String insoleSide;
+    private String insoleSide="L";
     private int footSize = 42;
     private String version= new String("0.1.6");
     byte[] numData = new byte[1];
     byte[] timeStamp = new byte[3];
 
 
+    //For the outputStream and concatenation of output data
+    OutPutStream outPutStream = new OutPutStream();
+
+
 
 
     // Boolean to not allow abort button to do more than aborting
-    private boolean logic;
+    private boolean logic=false;
 
     //For determining the type of data asked
     private int dataType;
@@ -129,164 +139,144 @@ public class MainActivity extends ActionBarActivity {
 
                     //Deciding what to do with data
 
+                    /*-----------------------*/
                     /* --- If it's a ping ---*/
+                    /*-----------------------*/
+
                     if(readMessage.equals("ping")) {
                         // Setting up the three byte arrays for the response
                         numData[0]= (byte) 1;
-                        String p = new String("pong");
-                        byte[] pBytes = p.getBytes();
+                        byte[] n = numData;
+                        byte[] t = timeStamp;
+                        String response = new String("pong");
+                        byte[] responseBytes = response.getBytes();
 
-                        // Concatenation of the three arrays
-
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-                        try {
-                            outputStream.write( numData );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( timeStamp );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( pBytes );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Sending info to client app
-
-                        byte[] c = outputStream.toByteArray();
-                        String concat = Arrays.toString(c);
-                        byte[] concatByte = concat.getBytes();
-                        //this.sendMessage(concat);
-
-                        //String pong = new String("pong");
-                        //byte[] b = pong.getBytes();
+                        // Concatenation of the three arrays and sending data
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream,numData,timeStamp,responseBytes);
                         bluetoothService.write(concatByte);
-
                         Toast.makeText(getApplicationContext()," The client app is requesting a "+readMessage,Toast.LENGTH_SHORT).show();
                     }
 
-
+                    /*-----------------------------------------*/
                     /* --- If data requested is the version ---*/
+                    /*-----------------------------------------*/
+
                     else if(readMessage.equals("version")) {
 
                         numData[0]= (byte) 3;
                         String p = new String(version);
-                        byte[] pBytes = p.getBytes();
+                        byte[] responseBytes = p.getBytes();
 
                         // Concatenation of the three arrays
-
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-                        try {
-                            outputStream.write( numData );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( timeStamp );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( pBytes );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Sending info to client app
-
-                        byte[] c = outputStream.toByteArray();
-                        String concat = Arrays.toString(c);
-                        byte[] concatByte = concat.getBytes();
-                        //this.sendMessage(concat);
-
-                        //String pong = new String("pong");
-                        //byte[] b = pong.getBytes();
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
                         bluetoothService.write(concatByte);
-                        Toast.makeText(getApplicationContext(),"the client app is requesting "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
                     }
 
+                    /*----------------------------------------------------*/
+                    /* --- If data requested is the side of the insole ---*/
+                    /*----------------------------------------------------*/
 
-                    /* --- If data requested is the side ---*/
                     else if(readMessage.equals("side")) {
                         numData[0]= (byte) 4;
                         String p = new String(insoleSide);
-                        byte[] pBytes = p.getBytes();
+                        byte[] responseBytes = p.getBytes();
 
-                        // Concatenation of the three arrays
+                        // Concatenation of the three arrays and sending response
 
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-                        try {
-                            outputStream.write( numData );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( timeStamp );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( pBytes );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Sending info to client app
-
-                        byte[] c = outputStream.toByteArray();
-                        String concat = Arrays.toString(c);
-                        byte[] concatByte = concat.getBytes();
-                        //this.sendMessage(concat);
-
-                        //String pong = new String("pong");
-                        //byte[] b = pong.getBytes();
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
                         bluetoothService.write(concatByte);
 
-                        Toast.makeText(getApplicationContext(), "the client app is requesting which the " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "the client app is requesting which " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
                     }
 
+                    /*------------------------------------------*/
                     /* --- If data requested is the footsize ---*/
+                    /*------------------------------------------*/
+
                     else if(readMessage.equals("footsize")) {
                         numData[0]= (byte) 1;
-                        String p = String.valueOf(footSize);
-                        byte[] pBytes = p.getBytes(Charset.forName("UTF-8"));
+                        byte[] responseBytes = new byte[1];
+                        responseBytes[0]= (byte) footSize;
 
                         // Concatenation of the three arrays
 
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-                        try {
-                            outputStream.write( numData );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( timeStamp );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.write( pBytes );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Sending info to client app
-
-                        byte[] c = outputStream.toByteArray();
-                        String concat = Arrays.toString(c);
-                        byte[] concatByte = concat.getBytes();
-                        //this.sendMessage(concat);
-
-                        //String pong = new String("pong");
-                        //byte[] b = pong.getBytes();
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
                         bluetoothService.write(concatByte);
 
                         Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage,Toast.LENGTH_SHORT).show();
+
                     }
+
+                    /*--------------------------------------------------*/
+                    /* --- If data requested is the number of sensor ---*/
+                    /*--------------------------------------------------*/
+
+                    else if(readMessage.equals("sensor_number")) {
+
+
+                        String sensor = sensorNumber.getText().toString();
+
+                        if(sensor.isEmpty() || sensor.equals("")){
+                            String error = new String("You must specify the number of sensors in the server app");
+                            byte[] er = error.getBytes();
+                            bluetoothService.write(er);
+                        }
+                        else{
+                            int sensorNb = Integer.parseInt(sensor);
+                            numData[0]= (byte) 2;
+                            byte[] responseBytes = new byte[1];
+                            responseBytes[0]= (byte) sensorNb;
+
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
+                            bluetoothService.write(concatByte);
+                            Toast.makeText(getApplicationContext(),"the client app is requesting the number of sensors of the insole",Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    }
+
+
+                    /*------------------------------------------------------*/
+                    /* --- If the request is to change the insole's name--- */
+                    /*------------------------------------------------------*/
+
+                    else if (readMessage.length()==10) {
+                        String t = new String("new_version");
+                        if(readMessage.toLowerCase().contains(t.toLowerCase())){
+
+                            if(readMessage.charAt(8) == (int) readMessage.charAt(8) && readMessage.charAt(9) == (int) readMessage.charAt(9)){
+                                nameParam1 = (int) readMessage.charAt(9);
+                                nameParam1 = (int) readMessage.charAt(9);
+                                String newName = generateName(nameParam1,nameParam2,insoleSide,footSize);
+                                insoleName.setText(newName);
+
+
+                                numData[0]= (byte) 12;
+                                String p = new String("name");
+                                byte[] responseBytes = p.getBytes();
+
+                                // Concatenation of the three arrays
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
+                                bluetoothService.write(concatByte);
+
+                                Toast.makeText(getApplicationContext(),"The name of the insole has been changed to "+newName,Toast.LENGTH_SHORT).show();}
+                        }
+
+
+                    }
+
+
+                    /*------------------------------*/
+                    /* --- If none of the above --- */
+                    /*------------------------------*/
+
                     else{
                         String unrec = new String("Request unrecognized");
                         byte[] b = unrec.getBytes();
@@ -334,6 +324,15 @@ public class MainActivity extends ActionBarActivity {
         send = (Button) findViewById(R.id.sendBtn);
         send.setBackgroundResource(R.drawable.send_selector);
 
+        // Name of the insole
+        NAME = (TextView) findViewById(R.id.NAME);
+        Typeface t = Typeface.createFromAsset(getAssets(),"fonts/Langdon.otf");
+        NAME.setTypeface(t);
+
+        insoleName = (TextView) findViewById(R.id.insoleName);
+
+        insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
+
         //Setting up the timestamp array
         timeStamp[0] = (byte) 1;
         timeStamp[1] = (byte) 2;
@@ -354,13 +353,17 @@ public class MainActivity extends ActionBarActivity {
         leftRight = (ToggleButton) findViewById(R.id.leftRight);
 
 
+
         leftRight.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     insoleSide = new String("R");
+                    insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
                     Toast.makeText(getApplicationContext(),"You're now a right side insole",Toast.LENGTH_SHORT).show();
+
                 } else {
                     insoleSide = new String("L");
+                    insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
                     Toast.makeText(getApplicationContext(),"You're now a left side insole",Toast.LENGTH_SHORT).show();
                 }
             }
@@ -400,6 +403,8 @@ public class MainActivity extends ActionBarActivity {
 
                 }
 
+
+
             }
 
             @Override
@@ -411,7 +416,7 @@ public class MainActivity extends ActionBarActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                logic = true;
+
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
 
@@ -421,6 +426,7 @@ public class MainActivity extends ActionBarActivity {
                     if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED)
                     {Toast.makeText(getApplicationContext(), "The client app needs to be connected first", Toast.LENGTH_SHORT).show();}
                     else {
+                        logic = true;
                         int sensorNbr = Integer.parseInt(messageS);
                         int frq = Integer.parseInt(messageF);
 
@@ -453,35 +459,11 @@ public class MainActivity extends ActionBarActivity {
                         });
                         loop.start();
                         progressBar.setVisibility(View.VISIBLE);
-
-                        //if(dataProvider.getSend()==false){loop.interrupt();}
-
-
-                        // check if the values entered are integers
-                    /*try {
-                        int num = Integer.parseInt(messageS);
-                        Log.i("", num + " is a number");
-                    } catch (NumberFormatException e) {
-                        Log.i("", messageS + "is not a number");
-                        Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
-                    }
-
-                    try {
-                        int num = Integer.parseInt(messageF);
-                        Log.i("", num + " is a number");
-                    } catch (NumberFormatException e) {
-                        Log.i("", messageF + "is not a number");
-                        Toast.makeText(getApplicationContext(), "the number of sensors should be a number", Toast.LENGTH_SHORT);
-                    }*/
-
-                        // send data if connected
-
-
                         // clear EditTexts
                         sensorNumber.setText("");
                         frequency.setText("");
                         //sendMessage(messageS);
-                        //sendMessage(messageF);
+                        //sendMessage(F);
                     }
                 }
             }
@@ -532,6 +514,13 @@ public class MainActivity extends ActionBarActivity {
             mOutStringBuffer.setLength(0);
             //sensorNumber.setText(mOutStringBuffer);
         }
+    }
+
+    public String generateName(int p1,int p2, String inSide,int footS){
+
+        int n = p1 + 256*p2;
+        String newName = n+inSide+"-"+footS;
+        return newName;
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -5,6 +5,7 @@
     android:gravity="center"
     android:textSize="17sp"
     android:padding="20sp"
+    android:textColor="#99afd5"
     android:background="@drawable/type_background">
 
 </TextView>

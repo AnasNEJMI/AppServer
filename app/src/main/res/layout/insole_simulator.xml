@@ -25,10 +25,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:paddingTop="20dp"
+                android:paddingTop="25dp"
                 android:paddingBottom="20dp"
                 android:paddingLeft="10dp"
-                android:paddingRight="80dp">
+                android:paddingRight="30dp">
 
                 <ToggleButton
                     android:layout_width="match_parent"
@@ -43,15 +43,40 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal"
+                    android:text="NAME"
+                    android:textColor="#99afd5"
+                    android:textSize="20sp"
+                    android:id="@+id/NAME"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal"
+                    android:textStyle="bold"
+                    android:textColor="#a3bbe3"
+                    android:layout_weight="1"
+                    android:id="@+id/insoleName"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:paddingRight="10dp"
-                android:paddingLeft="90dp">
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:paddingRight="20dp"
+                android:paddingLeft="45dp">
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -178,10 +203,9 @@
             android:layout_weight="2.05"
             android:orientation="horizontal"
             android:paddingTop="12dp"
-            android:paddingBottom="10dp"
-            android:paddingRight="15dp"
-            android:paddingLeft="15dp"
-            android:background="@drawable/text_edits">
+            android:paddingBottom="15dp"
+            android:paddingRight="30dp"
+            android:paddingLeft="30dp">
 
             <LinearLayout
                 android:layout_width="match_parent"

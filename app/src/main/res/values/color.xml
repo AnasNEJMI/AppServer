@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-        <color name="actionbar_background">#D44444</color>
+        <color name="actionbar_background">#1b364e</color>
+        <color name="primary">#295074</color>
+        <color name="primary_dark">#366d9d</color>
+        <color name="accent">#2d5a82</color>
 </resources>
