@@ -29,7 +29,10 @@ import android.widget.ToggleButton;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class MainActivity extends ActionBarActivity {
@@ -77,21 +80,24 @@ public class MainActivity extends ActionBarActivity {
     private String insoleSide="L";
     private int footSize = 42;
     private String version= new String("0.1.6");
-    byte[] numData = new byte[1];
-    byte[] timeStamp = new byte[4];
+
+
+    //Timestamp and data prefix
+    private byte[] numData = new byte[1];
+    private byte[] timeStamp = new byte[4];
 
 
     //For the outputStream and concatenation of output data
-    OutPutStream outPutStream = new OutPutStream();
-
-
+    private OutPutStream outPutStream = new OutPutStream();
 
 
     // Boolean to not allow abort button to do more than aborting
     private boolean logic=false;
 
+
     //For determining the type of data asked
     private int dataType;
+
 
     // Separate Thread for sending data
     private Thread loop;
@@ -100,8 +106,16 @@ public class MainActivity extends ActionBarActivity {
     // DataProvider
     private DataProvider dataProvider;
 
+
     //Number of data package sent
     private  int d =0;
+
+
+
+
+
+
+
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -378,10 +392,22 @@ public class MainActivity extends ActionBarActivity {
         insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
 
         //Setting up the timestamp array
-        timeStamp[0] = (byte) 1;
-        timeStamp[1] = (byte) 2;
-        timeStamp[2] = (byte) 3;
-        timeStamp[3] = (byte) 4;
+        String date = new SimpleDateFormat("dd,MM,yyyy,HH,mm,ss").format(new java.util.Date());
+
+        String[] dateParts = date.split(",");
+
+        byte t0 = (byte) Integer.parseInt(dateParts[0]);
+        byte t1 = (byte) Integer.parseInt(dateParts[1]);
+        byte t2 = (byte) Integer.parseInt(dateParts[2].substring(0,2));
+        byte t3 = (byte) Integer.parseInt(dateParts[2].substring(2,4));
+
+
+
+        Toast.makeText(getApplicationContext(),dateParts[3],Toast.LENGTH_SHORT).show();
+        timeStamp[0] = (byte) t0;
+        timeStamp[1] = (byte) t1;
+        timeStamp[2] = (byte) t2;
+        timeStamp[3] = (byte) t3;
 
 
 
@@ -431,17 +457,17 @@ public class MainActivity extends ActionBarActivity {
                 String itemAtPosition = new String(parent.getItemAtPosition(position).toString());
 
                 if(itemAtPosition.equals("Type 1")){
-                    Toast.makeText(getApplicationContext(),"Type of data chosen : 1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 1",Toast.LENGTH_SHORT).show();
                     if (DEBUG )Log.i(TAG,"updating to type 1");
                                dataType=1;
                     if (DEBUG) Log.i(TAG,"Update successful");
                 }else if(itemAtPosition.equals("Type 2")){
-                    Toast.makeText(getApplicationContext(),"Type of data chosen : 2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 2",Toast.LENGTH_SHORT).show();
                     if (DEBUG )Log.i(TAG,"updating to type 2");
                     dataType=2;
                     if (DEBUG) Log.i(TAG,"Update successful");
                 }else if(itemAtPosition.equals("Type 3")){
-                    Toast.makeText(getApplicationContext(),"Type of data chosen : 3",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 3",Toast.LENGTH_SHORT).show();
                     if (DEBUG )Log.i(TAG,"updating to type 3");
                     dataType=3;
                     if (DEBUG) Log.i(TAG,"Update successful");
