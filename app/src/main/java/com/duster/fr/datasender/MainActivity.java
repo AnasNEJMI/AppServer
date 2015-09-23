@@ -357,7 +357,7 @@ public class MainActivity extends ActionBarActivity {
                     /* --- If it is a request is to make the insole enter in a deep sleep-- */
                     /*----------------------------------------------------------------------*/
 
-                    else if(readMessage.equals("sleep")){
+                    else if(readMessage.equals("stop")){
 
                         if(DEBUG) Log.i(TAG,"attempting to sleep");
 
