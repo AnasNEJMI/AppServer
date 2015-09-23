@@ -10,6 +10,11 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:spinnerItemStyle">@style/MooSpinnerItem</item>
+        <item name="actionButtonStyle">@style/MyActionButtonStyle</item>
+    </style>
+    <style name="MyActionButtonStyle" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:minWidth">40dip</item>
+        <item name="android:padding">30dip</item>
     </style>
 
     <style name="MooSpinnerItem" parent="android:Widget.TextView.SpinnerItem">

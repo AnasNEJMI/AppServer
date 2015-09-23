@@ -3,21 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
 
 
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="1" app:showAsAction="never" />
-
-    <item android:id="@+id/action_send"
-        android:title="@string/action_send"
-        android:orderInCategory="3"
-        app:showAsAction="never" />
-
-    <item android:id="@+id/action_change"
-        android:title="@string/action_change"
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
         android:orderInCategory="2"
-        app:showAsAction="never" />
+        android:icon="@drawable/settings"
+        app:showAsAction="always" />
 
     <item android:id="@+id/action_make_discoverable"
-        android:icon="@drawable/enable_bluetooth"
+        android:icon="@drawable/enable_bluetooth2"
         android:title="@string/action_make_discoverable"
         android:orderInCategory="1"
         app:showAsAction="always" />

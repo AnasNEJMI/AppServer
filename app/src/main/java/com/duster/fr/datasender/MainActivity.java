@@ -55,8 +55,6 @@ public class MainActivity extends ActionBarActivity {
     private String mConnectedDeviceName = null;
     private BluetoothService bluetoothService;
 
-    private DataBuilder dataBuilder = new DataBuilder();
-
 
     //Layouts
     private  Button send;
@@ -80,7 +78,7 @@ public class MainActivity extends ActionBarActivity {
     private int footSize = 42;
     private String version= new String("0.1.6");
     byte[] numData = new byte[1];
-    byte[] timeStamp = new byte[3];
+    byte[] timeStamp = new byte[4];
 
 
     //For the outputStream and concatenation of output data
@@ -146,8 +144,6 @@ public class MainActivity extends ActionBarActivity {
                     if(readMessage.equals("ping")) {
                         // Setting up the three byte arrays for the response
                         numData[0]= (byte) 1;
-                        byte[] n = numData;
-                        byte[] t = timeStamp;
                         String response = new String("pong");
                         byte[] responseBytes = response.getBytes();
 
@@ -198,7 +194,7 @@ public class MainActivity extends ActionBarActivity {
                     /*------------------------------------------*/
 
                     else if(readMessage.equals("footsize")) {
-                        numData[0]= (byte) 1;
+                        numData[0]= (byte) 8;
                         byte[] responseBytes = new byte[1];
                         responseBytes[0]= (byte) footSize;
 
@@ -270,7 +266,51 @@ public class MainActivity extends ActionBarActivity {
                         }
 
 
+                    /*---------------------------------------------------------------*/
+                    /* --- If it is a request to the insole to start sending data--- */
+                    /*---------------------------------------------------------------*/
+
+                    }else if(readMessage.equals("start")){
+
+                        numData[0]= (byte) 10;
+                        String response = new String("start");
+                        byte[] responseBytes = response.getBytes();
+
+                        // Concatenation of the three arrays and sending response
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream,numData,timeStamp,responseBytes);
+                        bluetoothService.write(concatByte);
+                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending data",Toast.LENGTH_SHORT).show();
+
+                        //Sending the real data
+                        String messageS = sensorNumber.getText().toString();
+                        String messageF = frequency.getText().toString();
+                        sendData(messageS,messageF);
+
                     }
+
+                    /*---------------------------------------------------------------*/
+                    /* --- If it is a request to the insole to stop sending data--- */
+                    /*---------------------------------------------------------------*/
+
+                    else if(readMessage.equals("stop")){
+
+                        numData[0]= (byte) 11;
+                        String response = new String("stop");
+                        byte[] responseBytes = response.getBytes();
+
+                        // Concatenation of the three arrays and sending response
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] concatByte = outPutStream.concatenateData(outputStream, numData, timeStamp, responseBytes);
+                        bluetoothService.write(concatByte);
+                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending data",Toast.LENGTH_SHORT).show();
+
+                        //Sending the real data
+                        stopData();
+
+                    }
+
+
 
 
                     /*------------------------------*/
@@ -337,6 +377,7 @@ public class MainActivity extends ActionBarActivity {
         timeStamp[0] = (byte) 1;
         timeStamp[1] = (byte) 2;
         timeStamp[2] = (byte) 3;
+        timeStamp[3] = (byte) 4;
 
 
 
@@ -420,52 +461,7 @@ public class MainActivity extends ActionBarActivity {
                 String messageS = sensorNumber.getText().toString();
                 String messageF = frequency.getText().toString();
 
-                if (messageF.isEmpty() || messageS.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequency ", Toast.LENGTH_SHORT).show();
-                } else {
-                    if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED)
-                    {Toast.makeText(getApplicationContext(), "The client app needs to be connected first", Toast.LENGTH_SHORT).show();}
-                    else {
-                        logic = true;
-                        int sensorNbr = Integer.parseInt(messageS);
-                        int frq = Integer.parseInt(messageF);
-
-                        if(DEBUG) Log.i(TAG,"before updating dataProvider");
-                        dataProvider = new DataProvider(sensorNbr, frq, dataType);
-                        String s = String.valueOf(dataType);
-                        if (DEBUG) Log.i(TAG,"Update dataType to "+s);
-
-
-                        loop = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (true) {
-
-                                    while (dataProvider.getSend() == true) {
-                                        int f = dataProvider.getFrequency();
-                                        String message = Arrays.toString(dataProvider.getData());
-                                        //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
-                                        message += d;
-                                        d++;
-                                        sendMessage(message);
-                                        bluetoothService.sleep(1000 / f);
-                                        //int dt = dataProvider.getDataType();
-                                        // if(dt ==3){ dataProvider.setDataType(0);}
-                                        //else{dataProvider.setDataType(dt+1);}
-
-                                    }
-                                }
-                            }
-                        });
-                        loop.start();
-                        progressBar.setVisibility(View.VISIBLE);
-                        // clear EditTexts
-                        sensorNumber.setText("");
-                        frequency.setText("");
-                        //sendMessage(messageS);
-                        //sendMessage(F);
-                    }
-                }
+                sendData(messageS,messageF);
             }
         });
 
@@ -475,29 +471,91 @@ public class MainActivity extends ActionBarActivity {
         abort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(logic == true)
-
-                {dataProvider.abortSend();
-                d=0;
-                if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
-                loop.interrupt();
-                if(DEBUG){Log.d(TAG,"Trying Interruption successful");}
-
-                progressBar.setVisibility(View.GONE);
-
-                logic=!logic;
-                }else{
-                    Toast.makeText(getApplicationContext(),"There is no stream of data to be stopped",Toast.LENGTH_SHORT).show();
-                }
-
-
-
-
+                stopData();
             }
         });
 
     }
+
+
+    //Method for sending data
+
+    public void sendData(String message1, String message2){
+
+        if (message1.isEmpty() || message2.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequency ", Toast.LENGTH_SHORT).show();
+        }else {
+            if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED)
+            {Toast.makeText(getApplicationContext(), "The client app needs to be connected first", Toast.LENGTH_SHORT).show();}
+            else{
+
+                logic = true;
+                int sensorNbr = Integer.parseInt(message1);
+                int frq = Integer.parseInt(message2);
+
+                if(DEBUG) Log.i(TAG,"before updating dataProvider");
+                dataProvider = new DataProvider(sensorNbr, frq, dataType);
+                String s = String.valueOf(dataType);
+                if (DEBUG) Log.i(TAG,"Update dataType to "+s);
+
+
+                loop = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+
+                            while (dataProvider.getSend() == true) {
+                                int f = dataProvider.getFrequency();
+                                String message = Arrays.toString(dataProvider.getData());
+                                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                                message += d;
+                                d++;
+                                sendMessage(message);
+                                bluetoothService.sleep(1000 / f);
+                                //int dt = dataProvider.getDataType();
+                                // if(dt ==3){ dataProvider.setDataType(0);}
+                                //else{dataProvider.setDataType(dt+1);}
+
+                            }
+                        }
+                    }
+                });
+                loop.start();
+                progressBar.setVisibility(View.VISIBLE);
+                // clear EditTexts
+                sensorNumber.setText("");
+                frequency.setText("");
+
+            }
+        }
+
+
+
+
+    }
+
+
+
+    //Method for stopping data
+    public void stopData(){
+
+        if(logic == true)
+
+        {dataProvider.abortSend();
+            d=0;
+            if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
+            loop.interrupt();
+            if(DEBUG){Log.d(TAG,"Trying Interruption successful");}
+
+            progressBar.setVisibility(View.GONE);
+
+            logic=!logic;
+        }else{
+            Toast.makeText(getApplicationContext(),"There is no stream of data to be stopped",Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
 
     private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
@@ -544,14 +602,6 @@ public class MainActivity extends ActionBarActivity {
             case  R.id.action_make_discoverable:
                 bluetoothService.makeDiscoverable(this);
                 bluetoothService.accept();
-                return true;
-
-            case  R.id.action_send:
-                bluetoothService.sendOrStop();
-                return true;
-
-            case  R.id.action_change:
-                bluetoothService.change();
                 return true;
 
         }
