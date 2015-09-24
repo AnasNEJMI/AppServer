@@ -56,8 +56,8 @@ public class SettingsFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.settings,container,false);
-        getDialog().setTitle("Settings");
-
+        //getDialog().setTitle("                     Settings");
+        setStyle(DialogFragment.STYLE_NO_TITLE,0);
 
         //Linking layout elements to their attributes
 

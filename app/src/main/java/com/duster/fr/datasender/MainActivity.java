@@ -293,7 +293,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                         if(readMessage.toLowerCase().contains(t.toLowerCase())){
 
                             if(readMessage.charAt(8) == (int) readMessage.charAt(8) && readMessage.charAt(9) == (int) readMessage.charAt(9)){
-                                nameParam1 = (int) readMessage.charAt(9);
+                                nameParam1 = (int) readMessage.charAt(8);
                                 nameParam1 = (int) readMessage.charAt(9);
                                 String newName = generateName(nameParam1,nameParam2,insoleSide,footSize);
                                 insoleName.setText(newName);
@@ -378,16 +378,30 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                         Toast.makeText(getApplicationContext(),"The insole slept for 10 seconds",Toast.LENGTH_LONG).show();
                     }
 
+                    /*----------------------------------------------------------------------*/
+                    /* --- If it is a request is to inspect the battery-- */
+                    /*----------------------------------------------------------------------*/
 
+                    else if(readMessage.equals("stop")){
+
+                        if(DEBUG) Log.i(TAG,"attempting to sleep");
+
+                        try {
+                            Thread.currentThread().sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (DEBUG) Log.i(TAG,"Sleep succeeded");
+
+                        Toast.makeText(getApplicationContext(),"The insole slept for 10 seconds",Toast.LENGTH_LONG).show();
+                    }
 
                     /*------------------------------*/
                     /* --- If none of the above --- */
                     /*------------------------------*/
 
                     else{
-                        String unrec = new String("Request unrecognized");
-                        byte[] b = unrec.getBytes();
-                        bluetoothService.write(b);
+                        Toast.makeText(getApplicationContext(),"The client app rest an  unrecognized request",Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -432,9 +446,9 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         send.setBackgroundResource(R.drawable.send_selector);
 
         // Name of the insole
-        NAME = (TextView) findViewById(R.id.NAME);
+        //NAME = (TextView) findViewById(R.id.NAME);
         Typeface t = Typeface.createFromAsset(getAssets(),"fonts/Langdon.otf");
-        NAME.setTypeface(t);
+        //NAME.setTypeface(t);
 
         insoleName = (TextView) findViewById(R.id.insoleName);
 
@@ -653,13 +667,13 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     public String generateName(int p1,int p2, String inSide,int footS){
 
         int n = p1 + 256*p2;
-        String newName = n+inSide+"-"+footS;
+        String newName = "FeetMe "+n+inSide+"-"+footS;
         return newName;
     }
 
     public String generateNameBis(int p1, String inSide,int footS){
 
-        String newName = p1+inSide+"-"+footS;
+        String newName = "FeetMe "+p1+inSide+"-"+footS;
         return newName;
     }
 

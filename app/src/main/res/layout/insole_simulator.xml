@@ -50,15 +50,7 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_horizontal"
-                    android:text="NAME"
-                    android:textColor="#99afd5"
-                    android:textSize="20sp"
-                    android:id="@+id/NAME"
-                    android:layout_weight="1"/>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
