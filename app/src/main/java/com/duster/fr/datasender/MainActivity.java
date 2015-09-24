@@ -2,11 +2,15 @@ package com.duster.fr.datasender;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -27,7 +31,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.security.Timestamp;
 import java.text.SimpleDateFormat;
@@ -35,7 +41,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SettingsFragment.Communicator {
 
     // for Debuging purposes
     private static final String TAG = "MainActivity";
@@ -74,6 +80,7 @@ public class MainActivity extends ActionBarActivity {
     private TextView insoleName;
     private int nameParam1=1;
     private int nameParam2=1;
+    private int nameNumber=128;
 
 
     // Infos about the insole
@@ -466,16 +473,18 @@ public class MainActivity extends ActionBarActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     insoleSide = new String("R");
-                    insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
+                    insoleName.setText(generateNameBis(nameNumber, insoleSide, footSize));
                     Toast.makeText(getApplicationContext(),"You're now a right side insole",Toast.LENGTH_SHORT).show();
 
                 } else {
                     insoleSide = new String("L");
-                    insoleName.setText(generateName(nameParam1,nameParam2,insoleSide,footSize));
+                    insoleName.setText(generateNameBis(nameNumber, insoleSide, footSize));
                     Toast.makeText(getApplicationContext(),"You're now a left side insole",Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+
 
 
 
@@ -647,6 +656,18 @@ public class MainActivity extends ActionBarActivity {
         String newName = n+inSide+"-"+footS;
         return newName;
     }
+
+    public String generateNameBis(int p1, String inSide,int footS){
+
+        String newName = p1+inSide+"-"+footS;
+        return newName;
+    }
+
+    public void showDialog(){
+        FragmentManager manager = getFragmentManager();
+        SettingsFragment settings = new SettingsFragment();
+        settings.show(manager, "SettingsFragment");
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -664,6 +685,10 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         switch (item.getItemId()){
             case  R.id.action_settings:
+
+                showDialog();
+
+
                 return true;
 
             case  R.id.action_make_discoverable:
@@ -676,4 +701,42 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    // Methods of communication with the SettingsFragment
+
+    /*--- For receiving the new name ---*/
+    @Override
+    public void NameMessage(int nbr,String s,int foot) {
+
+        String n = nbr+s+"-"+foot;
+        footSize=foot;
+        nameNumber=nbr;
+        if(s.equals("R"))
+        {
+            if(DEBUG) Log.i(TAG, "right");
+            leftRight.setChecked(true);
+        }else if(s.equals("L"))
+        {
+            if(DEBUG) Log.i(TAG, "left");
+            leftRight.setChecked(false);
+        }
+        insoleName.setText(n);
+        Toast.makeText(getApplicationContext(),"The name of the insole has changed to "+n,Toast.LENGTH_SHORT).show();
+    }
+
+    /*--- For receiving the new version ---*/
+    @Override
+    public void VersionMessage(String message) {
+
+    }
+
+    /*--- For receiving the new footsize ---*/
+    @Override
+    public void FootsizeMessage(int intFoot) {
+
+        footSize = intFoot;
+        String name = nameNumber+insoleSide+"-"+footSize;
+        insoleName.setText(name);
+        Toast.makeText(getApplicationContext(),"footsize of the insole has changed to "+footSize,Toast.LENGTH_SHORT).show();
+    }
 }
