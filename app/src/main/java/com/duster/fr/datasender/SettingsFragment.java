@@ -79,11 +79,11 @@ public class SettingsFragment extends DialogFragment {
                     Toast.makeText(view.getContext(), "Make sure all values are correctly submitted", Toast.LENGTH_SHORT).show();
                 } else {
 
+                    /** -----  Return the values submitted to the MainActivity ----- **/
+
                     int intNbr = Integer.parseInt(nbr);
                     int intFoot = Integer.parseInt(foot);
                     communicator.NameMessage(intNbr,side, intFoot);
-
-                    /** -----  Return the values submitted to the MainActivity ----- **/
                 }
             }
         });
@@ -94,11 +94,6 @@ public class SettingsFragment extends DialogFragment {
         insoleS.add("R");
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, insoleS);
-
-
-        //Setting up the spinner
-        //nameSide = (Spinner) view.findViewById(R.id.data);
-        //ArrayAdapter<CharSequence> dataAdapter = ArrayAdapter.createFromResource(getActivity(),R.array.insole_side,android.R.layout.simple_spinner_item);
         dataAdapter.setDropDownViewResource(R.layout.spinner_textview);
         nameSide.setAdapter(dataAdapter);
 
@@ -134,11 +129,14 @@ public class SettingsFragment extends DialogFragment {
                     Toast.makeText(view.getContext(), "Make sure all values the footsize is submitted", Toast.LENGTH_SHORT).show();
                 } else {
 
+
+                    /** -----  Return the values submitted to the MainActivity ----- **/
+
                     int intNbr = Integer.parseInt(foot);
                     int intFoot = Integer.parseInt(foot);
                     communicator.FootsizeMessage(intFoot);
 
-                    /** -----  Return the values submitted to the MainActivity ----- **/
+
                 }
             }
         });
