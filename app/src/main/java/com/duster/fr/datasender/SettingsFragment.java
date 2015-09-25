@@ -103,10 +103,10 @@ public class SettingsFragment extends DialogFragment {
                 String itemAtPosition = new String(parent.getItemAtPosition(position).toString());
                 if(itemAtPosition.equals("L")){
                     side = new String("L");
-                    if (DEBUG) Log.i(TAG,"side update successful");
+                    if(MainActivity.DEBUG) Log.i(TAG,"side update successful");
                 }else if(itemAtPosition.equals("R")){
                     side = new String("R");
-                    if (DEBUG) Log.i(TAG,"side update successful");
+                    if(MainActivity.DEBUG) Log.i(TAG,"side update successful");
                 }
             }
 

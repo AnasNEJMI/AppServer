@@ -7,41 +7,23 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Created by Anas on 23/09/2015.
+ * Created by Anas on 25/09/2015.
  */
-public class OutPutStream extends ByteArrayOutputStream {
-
+public class MyByteArrayOutputStream extends ByteArrayOutputStream{
 
     private static final String TAG = "OutPutStream";
-    private static final boolean DEBUG = true;
 
 
-    public byte[] concatenateData(ByteArrayOutputStream outputStream,byte[] n ,byte[] t , byte[] d){
+    public byte[] concatenateThreeBytes(ByteArrayOutputStream outputStream,byte[] n ,byte[] t , byte[] d){
 
-        if(DEBUG) Log.i(TAG,"Attempting to concatenate");
+        if(MainActivity.DEBUG) Log.i(TAG, "Attempting to concatenate");
 
         try {
             outputStream.write(n);
             outputStream.write(t);
             outputStream.write(d);
         } catch (IOException e) {
-            Log.e(TAG, "error while concatenating the three byte arrays");
-        }
-
-
-        return Arrays.toString(outputStream.toByteArray()).getBytes();
-    }
-
-
-    public byte[] concatenateTwoBytes(ByteArrayOutputStream outputStream,byte[] n ,byte[] t ){
-
-        if(DEBUG) Log.i(TAG,"Attempting to concatenate");
-
-        try {
-            outputStream.write(n);
-            outputStream.write(t);
-        } catch (IOException e) {
-            Log.e(TAG, "error while concatenating the two byte arrays");
+            if(MainActivity.DEBUG) Log.e(TAG, "error while concatenating the three byte arrays");
         }
 
         byte[] c = outputStream.toByteArray();
@@ -52,5 +34,20 @@ public class OutPutStream extends ByteArrayOutputStream {
     }
 
 
+    public byte[] concatenateTwoBytes(ByteArrayOutputStream outputStream,byte[] n ,byte[] t ){
 
+        if(MainActivity.DEBUG) Log.i(TAG,"Attempting to concatenate");
+
+        try {
+            outputStream.write(n);
+            outputStream.write(t);
+        } catch (IOException e) {
+            if(MainActivity.DEBUG) Log.e(TAG, "error while concatenating the two byte arrays");
+        }
+        byte[] c = outputStream.toByteArray();
+        String concat = Arrays.toString(c);
+        byte[] concatByte = concat.getBytes();
+
+        return concatByte;
+    }
 }

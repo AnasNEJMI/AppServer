@@ -26,7 +26,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:paddingTop="25dp"
-                android:paddingBottom="20dp"
+                android:paddingBottom="25dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="30dp">
 
@@ -37,6 +37,7 @@
                     android:gravity="center_vertical"
                     android:textColor="#c2e0dd"
                     android:layout_weight="1"
+                    android:paddingTop="20dp"
                     android:background="@drawable/toggle_switch"
                     android:textOff=""
                     android:textOn=""/>
@@ -238,7 +239,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="6"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textColor="#99afd5"
+            android:text="BATTERY LEVEL"
+            android:textSize="16sp"
+            android:id="@+id/batteryLevel"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:textColor="#99afd5"
+            android:textSize="16sp"
+            android:id="@+id/battery"/>
     </LinearLayout>
 
 </LinearLayout>

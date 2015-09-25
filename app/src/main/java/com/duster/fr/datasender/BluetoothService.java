@@ -3,6 +3,7 @@ package com.duster.fr.datasender;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,8 +16,10 @@ import android.os.Handler;
 
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Created by Anas on 15/09/2015.
@@ -24,7 +27,6 @@ import android.util.Log;
 public class BluetoothService {
 
     private static final String TAG = "BluetoothService";
-    private static final boolean DEBUG = true;
     protected static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private int mState;
@@ -50,9 +52,12 @@ public class BluetoothService {
         mHandler = handler;
         this.activity = activity;
     }
+    public void setBluetoothServiceName(String s){
+        mAdapter.setName(s);
+    }
 
     private synchronized void setState(int state){
-        if(DEBUG) Log.d(TAG, "setState" + mState +"-->"+state);
+        if(MainActivity.DEBUG) Log.d(TAG, "setState" + mState +"-->"+state);
         mState=state;
     }
 
@@ -107,7 +112,7 @@ public class BluetoothService {
         mConnectedThread.start();
         Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(MainActivity.DEVICE_NAME, device.getName());
+        bundle.putString(MainActivity.insName, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
         setState(STATE_CONNECTED);
@@ -147,7 +152,7 @@ public class BluetoothService {
             try {
                 tmp = mAdapter.listenUsingRfcommWithServiceRecord("Data Sender for android", MY_UUID); // Unsed to get a BluetoothServerSocket running
             } catch (IOException e) {
-                Log.e(TAG, e.toString());
+                if(MainActivity.DEBUG) Log.e(TAG, e.toString());
             }
             mmServerSocket = tmp;
 
@@ -163,11 +168,11 @@ public class BluetoothService {
 
             } catch (IOException connectException) {
                 /*enabling the connection and closing the socket*/
-                Log.e(TAG,"close socket");
+                if(MainActivity.DEBUG) Log.e(TAG,"close socket");
                 try {
                     mmServerSocket.close();
                 } catch (IOException closeException) {
-                    Log.e(TAG,closeException.toString());
+                    if(MainActivity.DEBUG) Log.e(TAG,closeException.toString());
                 }
             }
 
@@ -212,13 +217,14 @@ public class BluetoothService {
             mmSocket = socket;
             mHandler = handler;
 
+
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
-                Log.e(TAG, "Could not get any data from the socket");
+                if(MainActivity.DEBUG) Log.e(TAG, "Could not get any data from the socket");
                 BluetoothService.this.stop();
             }
             mmInStream = tmpIn;
@@ -226,7 +232,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.i(TAG,"Begin mConnected");
+            if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
             byte[] buffer = new byte[1024];
             send = false;
@@ -235,10 +241,9 @@ public class BluetoothService {
                 try{
 
                     bytes = mmInStream.read(buffer);
-
                     mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
-                    Log.e(TAG,"disconnected",e);
+                    if(MainActivity.DEBUG) Log.e(TAG,"disconnected",e);
                     connectionLost();
                     break;
 
