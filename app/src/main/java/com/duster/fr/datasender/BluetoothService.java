@@ -251,6 +251,7 @@ public class BluetoothService {
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();
+                    if (MainActivity.DEBUG) Log.d(TAG,"attempting disconnetion");
                     mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
                 }
             }

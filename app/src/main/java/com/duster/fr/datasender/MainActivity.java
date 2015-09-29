@@ -542,6 +542,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                             Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_DISC:
+                    if(DEBUG) Log.d(TAG, "message of disconnecting");
                     dataProvider.abortSend();
                     break;
             }
