@@ -86,6 +86,7 @@ public class DataProvider {
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
+<<<<<<< HEAD
         data[0]=(byte)0;
         data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte)15;
 
@@ -96,6 +97,12 @@ public class DataProvider {
         data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte) ²²²15;
 >>>>>>> 05342b604ab4f34da8c4ec127c9c9e94fa6c3f65
 >>>>>>> f3431f60dfe293d2d788962c4f589761c389200c
+=======
+
+        data[0]=(byte)0;
+        data[1]=29;data[2]=9;data[3]=20;data[4]=15;
+
+>>>>>>> 5560b5c9fded69ffdc47c23071ccd6a7f9a37a23
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
 
