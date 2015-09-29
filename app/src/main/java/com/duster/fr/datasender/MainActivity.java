@@ -464,7 +464,9 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                         if(DEBUG) Log.i(TAG,"batteryView");
                         numData = (byte) 6;
-                        rBytes = new byte[]{5,(byte)batInt,1,2,1,3,1,4,1,5};
+                        rBytes = new byte[40];
+                        rBytes[4] = (byte)((batInt*10)%256);
+                        rBytes[5] = (byte)(batInt*10/256);
 
                         outputStream.reset();
 
