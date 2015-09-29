@@ -86,7 +86,7 @@ public class DataProvider {
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
         data[0]=(byte)10;
-        data[1]=29;data[2]=9;data[3]=20;data[4]=15;
+        data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte) ²²²15;
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
 
