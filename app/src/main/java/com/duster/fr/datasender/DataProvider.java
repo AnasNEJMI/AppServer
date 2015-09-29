@@ -69,7 +69,7 @@ public class DataProvider {
 
     /*--For Send--*/
     public  void abortSend(){
-        send =!send;
+        send = false;
     }
 
     public  boolean getSend(){
@@ -85,7 +85,7 @@ public class DataProvider {
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
-        data[0]=(byte)10;
+        data[0]=(byte)0;
         data[1]=29;data[2]=9;data[3]=20;data[4]=15;
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
@@ -106,30 +106,30 @@ public class DataProvider {
             Log.i(TAG,"data type ==2");
             for (int j = 0; j < frontSensors; j++) {
                 Random rand = new Random();
-                data[j] = (byte) (70 + rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD] = (byte) (70 + rand.nextInt((10 - 1) + 1));
             }
             for (int j = 0; j < middleSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors] = (byte) (60+ rand.nextInt((20 -(-5)) + (-5)));
+                data[j+OVERHEAD+frontSensors] = (byte) (60+ rand.nextInt((20 -(-5)) + (-5)));
             }
             for (int j = 0; j < backSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors+middleSensors] = (byte) (65+ rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD+frontSensors+middleSensors] = (byte) (65+ rand.nextInt((10 - 1) + 1));
             }
 
         }else if(dataType==3){
             Log.i(TAG,"data type ==3");
             for (int j = 0; j < frontSensors; j++) {
                 Random rand = new Random();
-                data[j] = (byte) (0 + rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD] = (byte) (0 + rand.nextInt((10 - 1) + 1));
             }
             for (int j = 0; j < middleSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors] = (byte) (50+ rand.nextInt((20 - 1) + 1));
+                data[j+OVERHEAD+frontSensors] = (byte) (50+ rand.nextInt((20 - 1) + 1));
             }
             for (int j = 0; j < backSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors+middleSensors] = (byte) (100+ rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD+frontSensors+middleSensors] = (byte) (100+ rand.nextInt((10 - 1) + 1));
             }
         }
 

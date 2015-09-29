@@ -113,10 +113,7 @@ public class BluetoothService {
 
         mConnectedThread = new ConnectedThread(socket, mHandler);
         mConnectedThread.start();
-        Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
-        Bundle bundle = new Bundle();
-        bundle.putString(MainActivity.insName, device.getName());
-        msg.setData(bundle);
+        Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME, device.getName());
         mHandler.sendMessage(msg);
         setState(STATE_CONNECTED);
 
@@ -239,12 +236,21 @@ public class BluetoothService {
             while(true) {
                 try {
 
-                    bytes = mmInStream.read(buffer);
-                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    if(mmInStream.available() > 0) {
+                        bytes = mmInStream.read(buffer);
+                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    }else{
+                        try {
+                            Thread.sleep(50);
+                        }catch (InterruptedException e){
+                            Log.w(TAG, Log.getStackTraceString(e));
+                        }
+                    }
 
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();
+                    mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
                 }
             }
         }
