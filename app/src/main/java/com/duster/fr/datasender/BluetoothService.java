@@ -11,6 +11,7 @@ import java.util.UUID;
 //import java.util.logging.Handler;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -93,6 +94,12 @@ public class BluetoothService {
 
 
     }
+    public synchronized void disconnect() {
+        if(MainActivity.DEBUG) Log.d(TAG, "disconnect");
+        if (mAcceptThread != null) {mAcceptThread.cancel(); mAcceptThread = null;}
+        if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
+        setState(STATE_NONE);
+    }
 
     /* Starting the thread to enable connection to device*/
     public synchronized void accept() {
@@ -158,26 +165,29 @@ public class BluetoothService {
 
         }
 
-        public void run(){
+        public void run() {
             /* Connection through a socket*/
-            try{
-                mbtSocket=mmServerSocket.accept(); // listening to connection requests
-                // not to be used in the main thread ( because it's a blocking call)
-                Log.i(TAG,"connection accepted");
-                mmServerSocket.close(); // Used to not accept additional connections
 
-            } catch (IOException connectException) {
-                /*enabling the connection and closing the socket*/
-                if(MainActivity.DEBUG) Log.e(TAG,"close socket");
+            while (mState != STATE_CONNECTED) {
                 try {
-                    mmServerSocket.close();
-                } catch (IOException closeException) {
-                    if(MainActivity.DEBUG) Log.e(TAG,closeException.toString());
-                }
-            }
+                    mbtSocket = mmServerSocket.accept(); // listening to connection requests
+                    // not to be used in the main thread ( because it's a blocking call)
+                    Log.i(TAG, "connection accepted");
+                    mmServerSocket.close(); // Used to not accept additional connections
 
-            if (mbtSocket!=null){
-                BluetoothService.this.Connected(mbtSocket,mbtSocket.getRemoteDevice());
+                } catch (IOException connectException) {
+                /*enabling the connection and closing the socket*/
+                    if (MainActivity.DEBUG) Log.e(TAG, "close socket");
+                    try {
+                        mmServerSocket.close();
+                    } catch (IOException closeException) {
+                        if (MainActivity.DEBUG) Log.e(TAG, closeException.toString());
+                    }
+
+                }
+                if (mbtSocket != null) {
+                    BluetoothService.this.Connected(mbtSocket, mbtSocket.getRemoteDevice());
+                }
             }
         }
 
@@ -234,25 +244,28 @@ public class BluetoothService {
         public void run() {
             if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
+            int b=0;
             byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
             while(true){
                 try{
+                    b = mmInStream.available();
 
-                    bytes = mmInStream.read(buffer);
-                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     if(MainActivity.DEBUG) Log.e(TAG,"disconnected",e);
-                    connectionLost();
-                    break;
-
-
+                    BluetoothService.this.disconnect();
                 }
-                try {
-                    bytes = mmInStream.available();
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                if(b>0){
+                    try {
+                        bytes = mmInStream.read(buffer,0,b);
+                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    } catch (IOException e) {
+                        BluetoothService.this.disconnect();
+                    }
+                }else{
+                    //Log.i(TAG,"no stream found");
                 }
                 /*if(bytes >0){
                     try {

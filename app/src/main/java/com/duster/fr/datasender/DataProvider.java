@@ -45,7 +45,7 @@ public class DataProvider {
 
     }
 
-    public  int getSenNumber(){
+    public  int getSensorNumber(){
         return sensorNumber;
 
     }
@@ -134,6 +134,15 @@ public class DataProvider {
                 Random rand = new Random();
                 data[j+frontSensors+middleSensors] = (byte) (100+ rand.nextInt((10 - 1) + 1));
             }
+        }
+
+        else if(dataType==4){
+            Log.i(TAG,"data type ==4");
+            for (int j = 0; j<sensorNumber; j++) {
+
+                data[j] = (byte) 0;
+            }
+
         }
         return data;
     }

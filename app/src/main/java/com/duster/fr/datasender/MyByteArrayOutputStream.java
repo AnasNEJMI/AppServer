@@ -26,11 +26,11 @@ public class MyByteArrayOutputStream extends ByteArrayOutputStream{
             if(MainActivity.DEBUG) Log.e(TAG, "error while concatenating the three byte arrays");
         }
 
-        byte[] c = outputStream.toByteArray();
-        String concat = Arrays.toString(c);
-        byte[] concatByte = concat.getBytes();
+        //byte[] c = outputStream.toByteArray();
+        //String concat = Arrays.toString(c);
+        //byte[] concatByte = concat.getBytes();
 
-        return concatByte;
+        return outputStream.toByteArray();
     }
 
 
@@ -44,10 +44,10 @@ public class MyByteArrayOutputStream extends ByteArrayOutputStream{
         } catch (IOException e) {
             if(MainActivity.DEBUG) Log.e(TAG, "error while concatenating the two byte arrays");
         }
-        byte[] c = outputStream.toByteArray();
-        String concat = Arrays.toString(c);
-        byte[] concatByte = concat.getBytes();
+        //byte[] c = outputStream.toByteArray();
+        //String concat = Arrays.toString(c);
+        //byte[] concatByte = concat.getBytes();
 
-        return concatByte;
+        return outputStream.toByteArray();
     }
 }
