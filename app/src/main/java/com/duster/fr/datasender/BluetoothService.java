@@ -159,8 +159,6 @@ public class BluetoothService {
 
         public void run() {
             /* Connection through a socket*/
-
-            while (mState != STATE_CONNECTED) {
                 try {
                     mbtSocket = mmServerSocket.accept(); // listening to connection requests
                     // not to be used in the main thread ( because it's a blocking call)
@@ -180,7 +178,7 @@ public class BluetoothService {
                 if (mbtSocket != null) {
                     BluetoothService.this.Connected(mbtSocket, mbtSocket.getRemoteDevice());
                 }
-            }
+
         }
 
         public void cancel(){
@@ -235,19 +233,15 @@ public class BluetoothService {
         public void run() {
             if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
-            int b=0;
             byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
             while(true) {
                 try {
-                    b = mmInStream.available();
-                    if (b > 0) {
-                        bytes = mmInStream.read(buffer, 0, b);
-                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-                    } else {
-                        //Log.i(TAG,"no stream found");
-                    }
+
+                    bytes = mmInStream.read(buffer);
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();

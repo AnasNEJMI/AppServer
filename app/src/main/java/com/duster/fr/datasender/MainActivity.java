@@ -165,9 +165,9 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                             bluetoothService.write(outputStream.toByteArray());
 
 
-                            mConnectedDeviceName = msg.getData().getString(insName);
-                            Toast.makeText(getApplicationContext(), "Connected to "
-                                    + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                            //mConnectedDeviceName = msg.getData().getString(insName);
+                            //Toast.makeText(getApplicationContext(), "Connected to "
+                            //        + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
                             break;
                         case BluetoothService.STATE_CONNECTING:
@@ -210,23 +210,23 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     /* --- If it's a ping ---*/
                     /*-----------------------*/
 
-                   if(readMessage.equals("ping")) {
+                    if(readMessage.equals("ping")) {
                         // Setting up the three byte arrays for the response
                         numData = (byte) 1;
 
-                       rBytes = "pong".getBytes();
+                        rBytes = "pong".getBytes();
 
-                       // Concatenation of the three arrays and sending dataSpinner
-                       outputStream.reset();
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        // Concatenation of the three arrays and sending dataSpinner
+                        outputStream.reset();
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
                         Toast.makeText(getApplicationContext()," The client app is requesting a "+readMessage,Toast.LENGTH_SHORT).show();
                     }
@@ -235,28 +235,28 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     /* --- If dataSpinner requested is the version ---*/
                     /*-----------------------------------------*/
 
-                     else if(readMessage.equals("version")) {
+                    else if(readMessage.equals("version")) {
 
                         numData = (byte) 3;
                         rBytes = version;
 
                         // Concatenation of the three arrays
-                       outputStream.reset();
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        outputStream.reset();
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
-                       Toast.makeText(getApplicationContext(),
-                               String.valueOf(outputStream.toByteArray().length),
-                               Toast.LENGTH_LONG)
-                               .show();
-                       Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),
+                                String.valueOf(outputStream.toByteArray().length),
+                                Toast.LENGTH_LONG)
+                                .show();
+                        Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
                     }
 
                     /*----------------------------------------------------*/
@@ -268,17 +268,17 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                         rBytes = insoleSide.getBytes();
 
                         // Concatenation of the three arrays and sending response
-                       outputStream.reset();
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
-                       Toast.makeText(getApplicationContext(), "the client app is requesting which " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
+                        outputStream.reset();
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
+                        Toast.makeText(getApplicationContext(), "the client app is requesting which " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
                     }
 
                     /*------------------------------------------*/
@@ -286,23 +286,23 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     /*------------------------------------------*/
 
                     else if(readMessage.equals("footsize")) {
-                       numData = (byte) 8;
-                       rBytes = new byte[1];
-                       rBytes[0]= (byte) footSize;
+                        numData = (byte) 8;
+                        rBytes = new byte[1];
+                        rBytes[0]= (byte) footSize;
 
                         // Concatenation of the three arrays
-                       outputStream.reset();
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        outputStream.reset();
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
-                       Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage,Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -384,27 +384,27 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                     }else if(readMessage.equals("start_sending")){
 
-                       numData = (byte) 10;
-                       rBytes = "start".getBytes();
+                        numData = (byte) 10;
+                        rBytes = "start".getBytes();
 
 
                         // Concatenation of the three arrays and sending response
-                       outputStream.reset();try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        outputStream.reset();try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
-                       Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending dataSpinner",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending dataSpinner",Toast.LENGTH_SHORT).show();
 
-                       //Sending the real dataSpinner
-                       String messageS = sensorNumberView.getText().toString();
-                       String messageF = frequencyView.getText().toString();
-                       sendData(messageS, messageF);
+                        //Sending the real dataSpinner
+                        String messageS = sensorNumberView.getText().toString();
+                        String messageF = frequencyView.getText().toString();
+                        sendData(messageS, messageF);
 
                     }
 
@@ -414,25 +414,25 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                     else if(readMessage.equals("stop_sending")){
 
-                       numData = (byte) 11;
-                       rBytes = "stop".getBytes();
+                        numData = (byte) 11;
+                        rBytes = "stop".getBytes();
 
                         // Concatenation of the three arrays and sending response
-                       outputStream.reset();try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        outputStream.reset();try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
 
                         Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending dataSpinner",Toast.LENGTH_SHORT).show();
 
                         //Sending the real dataSpinner
-                       stopData();
+                        stopData();
 
                     }
 
@@ -464,17 +464,17 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                         numData = (byte) 6;
                         rBytes = new byte[]{5,(byte)batInt,1,2,1,3,1,4,1,5};
 
-                       outputStream.reset();
+                        outputStream.reset();
 
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                           outputStream.write(rBytes);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
 
 
@@ -486,34 +486,34 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     /* --- If it is a request is to inspect the batteryView-- */
                     /*----------------------------------------------------------------------*/
 
-                   else if(readMessage.equals("reset_timestamp")){
+                    else if(readMessage.equals("reset_timestamp")){
 
-                       if(DEBUG) Log.i(TAG,"timestamp");
-                       numData = (byte) 5;
+                        if(DEBUG) Log.i(TAG,"timestamp");
+                        numData = (byte) 5;
 
-                       outputStream.reset();
-                       try {
-                           outputStream.write(numData);
-                           outputStream.write(timeStamp);
-                       } catch (IOException e) {
-                           Log.w(TAG, "write failure");
-                           break;
-                       }
-                       bluetoothService.write(outputStream.toByteArray());
-                       Toast.makeText(getApplicationContext(), "reset timestamp", Toast.LENGTH_SHORT).show();
+                        outputStream.reset();
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(timeStamp);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
+                        Toast.makeText(getApplicationContext(), "reset timestamp", Toast.LENGTH_SHORT).show();
 
 
 
-                   }
+                    }
 
                    /*------------------------------------------------------*/
                     /* --- If the request is to change the insole's name--- */
                     /*------------------------------------------------------*/
 
-                   else if (readMessage.toLowerCase().contains("#")) {
+                    else if (readMessage.toLowerCase().contains("#")) {
 
-                                //Toast.makeText(getApplicationContext(),"ignore",Toast.LENGTH_SHORT).show();
-                       }
+                        //Toast.makeText(getApplicationContext(),"ignore",Toast.LENGTH_SHORT).show();
+                    }
 
                     /*------------------------------*/
                     /* --- If none of the above --- */
@@ -524,10 +524,11 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     }
 
                     if(DEBUG)Log.d(TAG,"Message read");
-                    //Toast.makeText(getApplicationContext(),"message Read",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"message Read",Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_DEVICE_NAME:
                     // save the connected device's name
+                    Log.i(TAG,insName);
                     mConnectedDeviceName = msg.getData().getString(insName);
                     Toast.makeText(getApplicationContext(), "Connected to "
                             + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
@@ -585,9 +586,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         batteryView.setTypeface(t);
 
         //Gettin bettery info
-        if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
             this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        }
+
 
 
 
