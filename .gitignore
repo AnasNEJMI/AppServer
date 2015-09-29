@@ -1,7 +1,23 @@
-.gradle
+/captures
+
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
+
+
+# Android Studio
+*.iml
+.idea
+.gradle
 /build
-/captures
+
+# Windows thumbnail db
+Thumbs.db
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
