@@ -2,25 +2,21 @@ package com.duster.fr.datasender;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
-//import java.util.logging.Handler;
-import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
 
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-import android.widget.Toast;
+//import java.util.logging.Handler;
 
 /**
  * Created by Anas on 15/09/2015.
@@ -133,10 +129,6 @@ public class BluetoothService {
         return send;
     }
 
-    public void change(){
-        if(mConnectedThread!=null){mConnectedThread.change();}
-    }
-
     public void sleep(int t){
         try {
             Thread.sleep(t);
@@ -167,8 +159,6 @@ public class BluetoothService {
 
         public void run() {
             /* Connection through a socket*/
-
-            while (mState != STATE_CONNECTED) {
                 try {
                     mbtSocket = mmServerSocket.accept(); // listening to connection requests
                     // not to be used in the main thread ( because it's a blocking call)
@@ -188,7 +178,7 @@ public class BluetoothService {
                 if (mbtSocket != null) {
                     BluetoothService.this.Connected(mbtSocket, mbtSocket.getRemoteDevice());
                 }
-            }
+
         }
 
         public void cancel(){
@@ -221,7 +211,6 @@ public class BluetoothService {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
-        private DataBuilder dataBuilder = new DataBuilder();
 
         public ConnectedThread(BluetoothSocket socket, Handler handler) {
             mmSocket = socket;
@@ -244,58 +233,20 @@ public class BluetoothService {
         public void run() {
             if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
-            int b=0;
             byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
-            while(true){
-                try{
-                    b = mmInStream.available();
+            while(true) {
+                try {
+
+                    bytes = mmInStream.read(buffer);
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
 
                 } catch (IOException e) {
-                    if(MainActivity.DEBUG) Log.e(TAG,"disconnected",e);
+                    if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();
                 }
-
-                if(b>0){
-                    try {
-                        bytes = mmInStream.read(buffer,0,b);
-                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-                    } catch (IOException e) {
-                        BluetoothService.this.disconnect();
-                    }
-                }else{
-                    //Log.i(TAG,"no stream found");
-                }
-                /*if(bytes >0){
-                    try {
-                        mmInStream.read(buffer,0,bytes);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if(send){
-                    write(dataBuilder.getData());
-                    if(testInt>100000){
-                        testInt=0;
-                    }
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.printValue(testInt++);
-                        }
-                    });
-                }else{
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.printValue(100000);
-                        }
-                    });
-                }*/
-
             }
-
         }
 
         public void write(byte[] buffer){
@@ -319,13 +270,6 @@ public class BluetoothService {
                 Log.e("Reading", "Unable to read data on the stream", e);
             }
         }
-
-
-        public void change(){
-            dataBuilder.changeType();
-        }
-
-
 
         public void cancel() {
             Log.i(TAG, "cancel Thread");

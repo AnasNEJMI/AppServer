@@ -15,8 +15,9 @@ public class DataProvider {
     private static boolean DEBUG = false;
 
     //Number of sensors and frequency of transfer
-    private int sensorNumber;
+    private  int sensorNumber;
     private int frequency;
+    private final int OVERHEAD=5;
 
     //Type of data
     private int dataType;
@@ -38,12 +39,6 @@ public class DataProvider {
     }
 
     // Setters and getters
-
-    /*--For sensorNumber--*/
-    public  void setSensorNumber(int sensorNbr){
-        sensorNumber = sensorNbr;
-
-    }
 
     public  int getSensorNumber(){
         return sensorNumber;
@@ -89,21 +84,23 @@ public class DataProvider {
         int frontSensors=sensorNumberDividable/3 +(sensorNumber%3);
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
-        data = new byte[sensorNumber];
+        data = new byte[sensorNumber+OVERHEAD];
+        data[0]=(byte)10;
+        data[1]=29;data[2]=9;data[3]=20;data[4]=15;
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
 
             for (int j = 0; j < frontSensors; j++) {
                 Random rand = new Random();
-                data[j] = (byte) (100 + rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD] = (byte) (100 + rand.nextInt((10 - 1) + 1));
             }
             for (int j = 0; j < middleSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors] = (byte) (40+ rand.nextInt((20 - 1) + 1));
+                data[j+OVERHEAD+frontSensors] = (byte) (40+ rand.nextInt((20 - 1) + 1));
             }
             for (int j = 0; j < backSensors; j++) {
                 Random rand = new Random();
-                data[j+frontSensors+middleSensors] = (byte) (0+ rand.nextInt((10 - 1) + 1));
+                data[j+OVERHEAD+frontSensors+middleSensors] = (byte) (0+ rand.nextInt((10 - 1) + 1));
             }
         }else if(dataType == 2) {
             Log.i(TAG,"data type ==2");
@@ -140,7 +137,7 @@ public class DataProvider {
             Log.i(TAG,"data type ==4");
             for (int j = 0; j<sensorNumber; j++) {
 
-                data[j] = (byte) 15;
+                data[j+OVERHEAD] = (byte) 15;
             }
 
         }

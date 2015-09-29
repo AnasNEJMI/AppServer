@@ -83,7 +83,7 @@ public class SettingsFragment extends DialogFragment {
 
                     int intNbr = Integer.parseInt(nbr);
                     int intFoot = Integer.parseInt(foot);
-                    communicator.NameMessage(intNbr,side, intFoot);
+                    communicator.nameMessage(intNbr, side, intFoot);
                 }
             }
         });
@@ -134,7 +134,7 @@ public class SettingsFragment extends DialogFragment {
 
                     int intNbr = Integer.parseInt(foot);
                     int intFoot = Integer.parseInt(foot);
-                    communicator.FootsizeMessage(intFoot);
+                    communicator.footsizeMessage(intFoot);
 
 
                 }
@@ -147,8 +147,8 @@ public class SettingsFragment extends DialogFragment {
     }
 
     interface Communicator{
-        public void NameMessage(int nbr,String s, int foot);
-        public void VersionMessage(String message);
-        public void FootsizeMessage(int foot);
+        public void nameMessage(int nbr, String s, int foot);
+        public void versionMessage(String message);
+        public void footsizeMessage(int foot);
     }
 }
