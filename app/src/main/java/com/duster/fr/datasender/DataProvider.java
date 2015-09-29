@@ -86,11 +86,9 @@ public class DataProvider {
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
-<<<<<<< HEAD
         data[0]=(byte)0;
         data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte)15;
-=======
-<<<<<<< HEAD
+
         data[0]=(byte)0;
         data[1]=29;data[2]=9;data[3]=20;data[4]=15;
 =======
