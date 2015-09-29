@@ -87,7 +87,10 @@ public class DataProvider {
         data = new byte[sensorNumber+OVERHEAD];
 
         data[0]=(byte)0;
-        data[1]=29;data[2]=9;data[3]=20;data[4]=15;
+        data[1]=29;
+        data[2]=9;
+        data[3]=20;
+        data[4]=15;
 
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
