@@ -133,9 +133,6 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     private byte[] rBytes;
 
     private final Handler mHandler = new Handler() {
-
-
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -544,6 +541,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                 case MESSAGE_DISC:
                     if(DEBUG) Log.d(TAG, "message of disconnecting");
                     dataProvider.abortSend();
+
                     break;
             }
         }
