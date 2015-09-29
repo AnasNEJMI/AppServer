@@ -67,6 +67,7 @@ public class DataProvider {
 
     }
 
+    // add volatile variable
     /*--For Send--*/
     public  void abortSend(){
         send =!send;
@@ -85,8 +86,8 @@ public class DataProvider {
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
-        data[0]=(byte)10;
-        data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte) ²²²15;
+        data[0]=(byte)0;
+        data[1]=(byte) 29;data[2]=(byte) 9;data[3]=(byte) 20;data[4]=(byte)15;
         if(dataType == 1) {
             Log.i(TAG,"data type ==1");
 
