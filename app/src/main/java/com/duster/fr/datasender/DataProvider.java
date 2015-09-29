@@ -140,16 +140,11 @@ public class DataProvider {
             Log.i(TAG,"data type ==4");
             for (int j = 0; j<sensorNumber; j++) {
 
-                data[j] = (byte) 0;
+                data[j] = (byte) 15;
             }
 
         }
         return data;
     }
-
-    public void changeDataType(int type){
-        dataType=type;
-    }
-
 
 }

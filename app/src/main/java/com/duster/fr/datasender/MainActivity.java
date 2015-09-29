@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.nfc.Tag;
 import android.os.BatteryManager;
 import android.os.Message;
 import android.os.Bundle;
@@ -373,7 +374,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                         // Concatenation of the three arrays and sending response
                        outputStream.reset();
                        concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                       //bluetoothService.write(concatByte);
+                       bluetoothService.write(concatByte);
 
 
                         Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending data",Toast.LENGTH_SHORT).show();
@@ -433,7 +434,12 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                         if(DEBUG) Log.i(TAG,"battery");
                         numData[0]= (byte) 6;
-                        rBytes = new byte[]{5,(byte)batInt,1,2,1,3,1,4,1,5};
+                       rBytes = new byte[40];
+                       rBytes[0]=(byte)batInt;
+                       for(int i =1; i<40;i++){
+                           rBytes[i]= (byte) 1;
+                       }
+
 
                        outputStream.reset();
                        concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
@@ -738,7 +744,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                             while (dataProvider.getSend() == true) {
                                 int f = dataProvider.getFrequency();
                                 outputStream.reset();
-                                concatByteBis = myByteArrayOutputStream.concatenateTwoBytes(outputStream, concatByte, dataProvider.getData());
+                                concatByteBis = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData,timeStamp, dataProvider.getData());
                                 /************************************/
                                 //String message = Arrays.toString(dataProvider.getData());
                                 String message = new String(concatByteBis);
@@ -852,8 +858,15 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                 return true;
 
             case  R.id.action_make_discoverable:
-                bluetoothService.makeDiscoverable(this);
-                bluetoothService.accept();
+                if(sensorNumber.getText().toString().isEmpty() || frequency.getText().toString().isEmpty()){
+                    if(DEBUG) Log.i(TAG,"no value entered");
+                    Toast.makeText(getApplicationContext(),"enter the values of frequency and the number of sensors ",Toast.LENGTH_SHORT);
+                }
+                else{
+                    bluetoothService.makeDiscoverable(this);
+                    bluetoothService.accept();
+                }
+
                 return true;
 
         }
