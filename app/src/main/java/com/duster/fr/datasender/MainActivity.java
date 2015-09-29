@@ -802,10 +802,6 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             frequencyView.setText("");
 
         }
-
-
-
-
     }
 
 
