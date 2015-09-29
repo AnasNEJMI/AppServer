@@ -62,7 +62,7 @@ public class BluetoothService {
         return mState;
     }
 
-    public synchronized void stop() {
+    private synchronized void stop() {
         Log.d(TAG, "stop");
         if (mAcceptThread != null) {
             mAcceptThread.cancel();
@@ -91,9 +91,7 @@ public class BluetoothService {
 
     }
     public synchronized void disconnect() {
-        if(MainActivity.DEBUG) Log.d(TAG, "disconnect");
-        if (mAcceptThread != null) {mAcceptThread.cancel(); mAcceptThread = null;}
-        if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
+        stop();
         setState(STATE_NONE);
     }
 
@@ -221,7 +219,7 @@ public class BluetoothService {
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
                 if(MainActivity.DEBUG) Log.e(TAG, "Could not get any data from the socket");
-                BluetoothService.this.stop();
+                BluetoothService.this.disconnect();
             }
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
@@ -250,8 +248,9 @@ public class BluetoothService {
 
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
-                    BluetoothService.this.disconnect();
+                    Log.d(TAG, "send Message disconnection");
                     mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
+                    BluetoothService.this.disconnect();
                 }
             }
         }
@@ -282,7 +281,8 @@ public class BluetoothService {
             Log.i(TAG, "cancel Thread");
             running = false;
 
-            try {Thread.sleep(100);
+            try {
+                Thread.sleep(100);
             } catch (InterruptedException e){
                 Log.e(TAG, "interrupter");
             }

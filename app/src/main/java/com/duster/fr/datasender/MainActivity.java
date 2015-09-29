@@ -133,9 +133,6 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     private byte[] rBytes;
 
     private final Handler mHandler = new Handler() {
-
-
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -542,7 +539,9 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                             Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_DISC:
+                    Log.d(TAG, "Message disconnection");
                     dataProvider.abortSend();
+
                     break;
             }
         }
