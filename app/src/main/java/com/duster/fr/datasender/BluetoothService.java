@@ -203,7 +203,7 @@ public class BluetoothService {
 
         private static final String TAG = "ConnectedThread";
 
-        private volatile boolean running = true;
+        private volatile boolean running;
 
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
@@ -228,12 +228,13 @@ public class BluetoothService {
         }
 
         public void run() {
+            running = true;
             if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
             byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
-            while(true) {
+            while(running) {
                 try {
 
                     if(mmInStream.available() > 0) {
