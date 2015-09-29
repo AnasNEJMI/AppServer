@@ -42,6 +42,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_DISC = 6;
     public static final int MESSAGE_TOAST = 5;
 
     //Key names received from BlutoothService handler
@@ -109,7 +110,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
     // Boolean to not allow abort button to do more than aborting
-    private boolean logic=false;
+    private boolean isSendingData =false;
 
 
     //For determining the type of dataSpinner asked
@@ -389,7 +390,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
                         // Concatenation of the three arrays and sending response
-                        outputStream.reset();try {
+                        outputStream.reset();
+                        try {
                             outputStream.write(numData);
                             outputStream.write(timeStamp);
                             outputStream.write(rBytes);
@@ -529,13 +531,16 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                 case MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     Log.i(TAG,insName);
-                    mConnectedDeviceName = msg.getData().getString(insName);
+                    mConnectedDeviceName = (String) msg.obj;
                     Toast.makeText(getApplicationContext(), "Connected to "
                             + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
                             Toast.LENGTH_SHORT).show();
+                    break;
+                case MESSAGE_DISC:
+                    dataProvider.abortSend();
                     break;
             }
         }
@@ -555,8 +560,6 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         bluetoothService = new BluetoothService(mHandler,this);
         insName = new String(generateNameBis(nameNumber, insoleSide, footSize));
         bluetoothService.setBluetoothServiceName(insName);
-        bluetoothService.accept();
-
 
         //side of the foot
         left_foot = (ImageView) findViewById(R.id.left_foot);
@@ -757,55 +760,51 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
         if (message1.isEmpty() || message2.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequencyView ", Toast.LENGTH_SHORT).show();
-        }else {
-            sensorNumberView.setFocusable(false);
-            //sensorNumberView.setEnabled(false);
-
-            frequencyView.setFocusable(false);
-            //frequencyView.setEnabled(false);
-            logic = true;
-            int sensorNbr = Integer.parseInt(message1);
-            int frq = Integer.parseInt(message2);
-
-            if(DEBUG) Log.i(TAG,"before updating dataProvider");
-            dataProvider = new DataProvider(sensorNbr, frq, dataType);
-            String s = String.valueOf(dataType);
-            if (DEBUG) Log.i(TAG,"Update dataType to "+s);
-
-
-            loop = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (dataProvider.getSend()) {
-                        int f = dataProvider.getFrequency();
-                        outputStream.reset();
-                        try{
-                            outputStream.write(dataProvider.getData());
-                        }catch (IOException e){
-                            Log.w(TAG, "failed to write dataSpinner");
-                            continue;
-                        }
-                        /************************************/
-                        //String message = Arrays.toString(dataProvider.getData());
-                        String message = new String(outputStream.toByteArray());
-                        //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
-                        //d++;
-                        sendMessage(message);
-                        bluetoothService.sleep(1000 / f);
-                    }
-                }
-            });
-            loop.start();
-            progressBar.setVisibility(View.VISIBLE);
-            // clear EditTexts
-            sensorNumberView.setText("");
-            frequencyView.setText("");
-
+            return;
         }
 
+        sensorNumberView.setFocusable(false);
+        //sensorNumberView.setEnabled(false);
+
+        frequencyView.setFocusable(false);
+        //frequencyView.setEnabled(false);
+        isSendingData = true;
+        int sensorNbr = Integer.parseInt(message1);
+        int frq = Integer.parseInt(message2);
+
+        if(DEBUG) Log.i(TAG,"before updating dataProvider");
+        dataProvider = new DataProvider(sensorNbr, frq, dataType);
+        String s = String.valueOf(dataType);
+        if (DEBUG) Log.i(TAG,"Update dataType to "+s);
 
 
-
+        loop = new Thread(){
+            @Override
+            public void run() {
+                while (dataProvider.getSend()) {
+                    int f = dataProvider.getFrequency();
+                    outputStream.reset();
+                    try{
+                        outputStream.write(dataProvider.getData());
+                    }catch (IOException e){
+                        Log.w(TAG, "failed to write dataSpinner");
+                        continue;
+                    }
+                    /************************************/
+                    //String message = Arrays.toString(dataProvider.getData());
+                    String message = new String(outputStream.toByteArray());
+                    //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                    //d++;
+                    sendMessage(message);
+                    bluetoothService.sleep(1000 / f);
+                }
+            }
+        };
+        loop.start();
+        progressBar.setVisibility(View.VISIBLE);
+        // clear EditTexts
+        sensorNumberView.setText("");
+        frequencyView.setText("");
     }
 
 
@@ -813,9 +812,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     //Method for stopping dataSpinner
     public void stopData(){
 
-        if(logic == true)
-
-        {dataProvider.abortSend();
+        if(isSendingData) {
+            dataProvider.abortSend();
 
             sensorNumberView.setFocusableInTouchMode(true);
             //sensorNumberView.setEnabled(true);
@@ -824,14 +822,15 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             //frequencyView.setEnabled(true);
             d=0;
             if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
-            loop.interrupt();
             if(DEBUG){Log.d(TAG,"Trying Interruption successful");}
 
             progressBar.setVisibility(View.GONE);
 
-            logic=!logic;
+            isSendingData =false;
         }else{
-            Toast.makeText(getApplicationContext(),"There is no stream of dataSpinner to be stopped",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),
+                    "There is no stream of dataSpinner to be stopped",
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -889,10 +888,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         //noinspection SimplifiableIfStatement
         switch (item.getItemId()){
             case  R.id.action_settings:
-
                 showDialog();
-
-
                 return true;
 
             case  R.id.action_make_discoverable:
