@@ -15,7 +15,7 @@ public class DataProvider {
     private static boolean DEBUG = false;
 
     //Number of sensors and frequency of transfer
-    private int sensorNumber;
+    private final int sensorNumber;
     private int frequency;
 
     //Type of data
@@ -38,12 +38,6 @@ public class DataProvider {
     }
 
     // Setters and getters
-
-    /*--For sensorNumber--*/
-    public  void setSensorNumber(int sensorNbr){
-        sensorNumber = sensorNbr;
-
-    }
 
     public  int getSensorNumber(){
         return sensorNumber;
@@ -145,10 +139,6 @@ public class DataProvider {
 
         }
         return data;
-    }
-
-    public void changeDataType(int type){
-        dataType=type;
     }
 
 

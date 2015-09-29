@@ -1,23 +1,15 @@
 package com.duster.fr.datasender;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
-import android.os.Message;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -31,23 +23,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
-
-import android.os.Handler;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class MainActivity extends ActionBarActivity implements SettingsFragment.Communicator {
 
@@ -80,16 +62,15 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     //Layouts
     private  Button send;
     private  Button abort;
-    private EditText sensorNumber;
-    private EditText frequency;
+    private EditText sensorNumberView;
+    private EditText frequencyView;
     private ProgressBar progressBar;
-    private Spinner data;
-    private TextView typeOfData;
-    private ToggleButton leftRight;
+    private Spinner dataSpinner;
+    private TextView typeOfDataView;
+    private ToggleButton leftRightButton;
 
     //Name of the Insole
-    private TextView NAME;
-    private TextView insoleName;
+    private TextView insoleNameView;
     private int nameParam1=1;
     private int nameParam2=1;
     private int nameNumber=128;
@@ -103,43 +84,39 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     //private String version= new String("0.1.6");
 
 
-    //Timestamp and data prefix
-    private byte[] numData = new byte[1];
+    //Timestamp and dataSpinner prefix
+    private byte numData;
     private byte[] timeStamp = new byte[4];
 
     //Battery level
-    private TextView batteryLevel;
-    private TextView battery;
+    private TextView batteryLevelView;
+    private TextView batteryView;
     private int batInt;
 
     // side of the foot
     private ImageView left_foot;
     private ImageView right_foot;
 
-    //Receiver of battery info
+    //Receiver of batteryView info
     private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context ctxt, Intent intent) {
             int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             batInt=level;
-            battery.setText(String.valueOf(level) + "%");
+            batteryView.setText(String.valueOf(level) + "%");
         }
     };
-
-
-    //For the outputStream and concatenation of output data
-    private MyByteArrayOutputStream myByteArrayOutputStream = new MyByteArrayOutputStream();
 
 
     // Boolean to not allow abort button to do more than aborting
     private boolean logic=false;
 
 
-    //For determining the type of data asked
+    //For determining the type of dataSpinner asked
     private int dataType;
 
 
-    // Separate Thread for sending data
+    // Separate Thread for sending dataSpinner
     private Thread loop;
 
 
@@ -147,21 +124,12 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     private DataProvider dataProvider;
 
 
-    //Number of data package sent
+    //Number of dataSpinner package sent
     private  int d =0;
 
     //
     private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private byte[] rBytes;
-    private byte[] concatByte;
-    private byte[]concatByteBis;
-
-
-
-
-
-
-
 
     private final Handler mHandler = new Handler() {
 
@@ -181,14 +149,20 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                             // Use StringBuilder for adding strings //
 
-                            numData[0]= (byte) 14;
+                            numData = (byte) 14;
                             byte[] responseBytes;
                             responseBytes = "madm".getBytes();
 
-                            // Concatenation of the three arrays and sending data
+                            // Concatenation of the three arrays and sending dataSpinner
                             outputStream.reset();
-                            byte[] concatByte = myByteArrayOutputStream.concatenateTwoBytes(outputStream,numData,responseBytes);
-                            bluetoothService.write(concatByte);
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(responseBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            bluetoothService.write(outputStream.toByteArray());
 
 
                             mConnectedDeviceName = msg.getData().getString(insName);
@@ -211,12 +185,17 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     String writeMessage = new String(writeBuf);
 
                     if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED){
-                        numData[0]= (byte) 14;
+                        numData = (byte) 14;
                         rBytes = "madm".getBytes();
 
-                        // Concatenation of the three arrays and sending data
-                        byte[] concatByte = myByteArrayOutputStream.concatenateTwoBytes(outputStream, numData, rBytes);
-                        bluetoothService.write(concatByte);
+                        try {
+                            outputStream.write(numData);
+                            outputStream.write(rBytes);
+                        } catch (IOException e) {
+                            Log.w(TAG, "write failure");
+                            break;
+                        }
+                        bluetoothService.write(outputStream.toByteArray());
 
                     }
                     break;
@@ -225,7 +204,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-                    //Deciding what to do with data
+                    //Deciding what to do with dataSpinner
 
                     /*-----------------------*/
                     /* --- If it's a ping ---*/
@@ -233,92 +212,128 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                    if(readMessage.equals("ping")) {
                         // Setting up the three byte arrays for the response
-                        numData[0]= (byte) 1;
+                        numData = (byte) 1;
 
                        rBytes = "pong".getBytes();
 
-                       // Concatenation of the three arrays and sending data
+                       // Concatenation of the three arrays and sending dataSpinner
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                       bluetoothService.write(concatByte);
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
                         Toast.makeText(getApplicationContext()," The client app is requesting a "+readMessage,Toast.LENGTH_SHORT).show();
                     }
 
                     /*-----------------------------------------*/
-                    /* --- If data requested is the version ---*/
+                    /* --- If dataSpinner requested is the version ---*/
                     /*-----------------------------------------*/
 
                      else if(readMessage.equals("version")) {
 
-                        numData[0]= (byte) 3;
+                        numData = (byte) 3;
                         rBytes = version;
 
                         // Concatenation of the three arrays
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
-                        bluetoothService.write(concatByte);
-                       Toast.makeText(getApplicationContext(),String.valueOf(concatByte.length),Toast.LENGTH_LONG).show();
-                        Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
+                       Toast.makeText(getApplicationContext(),
+                               String.valueOf(outputStream.toByteArray().length),
+                               Toast.LENGTH_LONG)
+                               .show();
+                       Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage+" of the insole",Toast.LENGTH_SHORT).show();
                     }
 
                     /*----------------------------------------------------*/
-                    /* --- If data requested is the side of the insole ---*/
+                    /* --- If dataSpinner requested is the side of the insole ---*/
                     /*----------------------------------------------------*/
 
                     else if(readMessage.equals("insole_side")) {
-                        numData[0]= (byte) 4;
+                        numData = (byte) 4;
                         rBytes = insoleSide.getBytes();
 
                         // Concatenation of the three arrays and sending response
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                        bluetoothService.write(concatByte);
-                        Toast.makeText(getApplicationContext(), "the client app is requesting which " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
+                       Toast.makeText(getApplicationContext(), "the client app is requesting which " + readMessage+" is the insole",Toast.LENGTH_SHORT).show();
                     }
 
                     /*------------------------------------------*/
-                    /* --- If data requested is the footsize ---*/
+                    /* --- If dataSpinner requested is the footsize ---*/
                     /*------------------------------------------*/
 
                     else if(readMessage.equals("footsize")) {
-                        numData[0]= (byte) 8;
+                       numData = (byte) 8;
                        rBytes = new byte[1];
                        rBytes[0]= (byte) footSize;
 
                         // Concatenation of the three arrays
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                        bluetoothService.write(concatByte);
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
-
-                        Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage,Toast.LENGTH_SHORT).show();
+                       Toast.makeText(getApplicationContext(),"the client app is requesting the "+readMessage,Toast.LENGTH_SHORT).show();
 
                     }
 
                     /*--------------------------------------------------*/
-                    /* --- If data requested is the number of sensor ---*/
+                    /* --- If dataSpinner requested is the number of sensor ---*/
                     /*--------------------------------------------------*/
 
                     else if(readMessage.equals("sensors_number")) {
 
 
-                        String sensor = sensorNumber.getText().toString();
+                        String sensor = sensorNumberView.getText().toString();
 
                         if(sensor.isEmpty() || sensor.equals("")){
                             Log.i(TAG,"sensor is empty");
                             Toast.makeText(getApplicationContext(),"The client app is requesting the number of sensors which is not yet specified",Toast.LENGTH_SHORT).show();
                         }
                         else{
-                            numData[0]= (byte) 2;
+                            numData = (byte) 2;
                             rBytes = new byte[1];
                             rBytes[0]= (byte) Integer.parseInt(sensor);
 
                             outputStream.reset();
-                            concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                            bluetoothService.write(concatByte);
-
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            bluetoothService.write(outputStream.toByteArray());
 
                             Toast.makeText(getApplicationContext(),"the client app is requesting the number of sensors of the insole",Toast.LENGTH_SHORT).show();
 
@@ -341,16 +356,19 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                                 insName = generateName(nameParam1, nameParam2, insoleSide, footSize);
                                 bluetoothService.setBluetoothServiceName(insName);
                                 //DEVICE_NAME=insName;
-                                insoleName.setText(insName);
+                                insoleNameView.setText(insName);
 
 
-                                numData[0]= (byte) 12;
-                                rBytes = "name".getBytes();
-
-                                // Concatenation of the three arrays
-                                outputStream.reset();
-                                concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                                bluetoothService.write(concatByte);
+                                numData = (byte) 12;
+                                try {
+                                    outputStream.write(numData);
+                                    outputStream.write(timeStamp);
+                                    outputStream.write(rBytes);
+                                } catch (IOException e) {
+                                    Log.w(TAG, "write failure");
+                                    break;
+                                }
+                                bluetoothService.write(outputStream.toByteArray());
 
 
 
@@ -361,48 +379,59 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
                     /*---------------------------------------------------------------*/
-                    /* --- If it is a request to the insole to start sending data--- */
+                    /* --- If it is a request to the insole to start sending dataSpinner--- */
                     /*---------------------------------------------------------------*/
 
                     }else if(readMessage.equals("start_sending")){
 
-                        numData[0]= (byte) 10;
+                       numData = (byte) 10;
                        rBytes = "start".getBytes();
 
 
                         // Concatenation of the three arrays and sending response
-                       outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                       //bluetoothService.write(concatByte);
+                       outputStream.reset();try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
+                       Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending dataSpinner",Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending data",Toast.LENGTH_SHORT).show();
-
-                        //Sending the real data
-                        String messageS = sensorNumber.getText().toString();
-                        String messageF = frequency.getText().toString();
+                       //Sending the real dataSpinner
+                       String messageS = sensorNumberView.getText().toString();
+                       String messageF = frequencyView.getText().toString();
                        sendData(messageS, messageF);
 
                     }
 
                     /*---------------------------------------------------------------*/
-                    /* --- If it is a request to the insole to stop sending data--- */
+                    /* --- If it is a request to the insole to stop sending dataSpinner--- */
                     /*---------------------------------------------------------------*/
 
                     else if(readMessage.equals("stop_sending")){
 
-                        numData[0]= (byte) 11;
+                       numData = (byte) 11;
                        rBytes = "stop".getBytes();
 
                         // Concatenation of the three arrays and sending response
-                       outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                        bluetoothService.write(concatByte);
+                       outputStream.reset();try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
 
-                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending data",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext()," The client app is requesting to "+readMessage+ " sending dataSpinner",Toast.LENGTH_SHORT).show();
 
-                        //Sending the real data
+                        //Sending the real dataSpinner
                        stopData();
 
                     }
@@ -426,18 +455,26 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     }
 
                     /*----------------------------------------------------------------------*/
-                    /* --- If it is a request is to inspect the battery-- */
+                    /* --- If it is a request is to inspect the batteryView-- */
                     /*----------------------------------------------------------------------*/
 
                     else if(readMessage.equals("battery_info")){
 
-                        if(DEBUG) Log.i(TAG,"battery");
-                        numData[0]= (byte) 6;
+                        if(DEBUG) Log.i(TAG,"batteryView");
+                        numData = (byte) 6;
                         rBytes = new byte[]{5,(byte)batInt,1,2,1,3,1,4,1,5};
 
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateThreeBytes(outputStream, numData, timeStamp, rBytes);
-                       bluetoothService.write(concatByte);
+
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                           outputStream.write(rBytes);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
 
 
 
@@ -446,17 +483,23 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     }
 
                    /*----------------------------------------------------------------------*/
-                    /* --- If it is a request is to inspect the battery-- */
+                    /* --- If it is a request is to inspect the batteryView-- */
                     /*----------------------------------------------------------------------*/
 
                    else if(readMessage.equals("reset_timestamp")){
 
                        if(DEBUG) Log.i(TAG,"timestamp");
-                       numData[0]= (byte) 5;
+                       numData = (byte) 5;
 
                        outputStream.reset();
-                       concatByte = myByteArrayOutputStream.concatenateTwoBytes(outputStream, numData, timeStamp);
-                       bluetoothService.write(concatByte);
+                       try {
+                           outputStream.write(numData);
+                           outputStream.write(timeStamp);
+                       } catch (IOException e) {
+                           Log.w(TAG, "write failure");
+                           break;
+                       }
+                       bluetoothService.write(outputStream.toByteArray());
                        Toast.makeText(getApplicationContext(), "reset timestamp", Toast.LENGTH_SHORT).show();
 
 
@@ -479,12 +522,6 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     else{
                         Toast.makeText(getApplicationContext(),"The client app rest an  unrecognized request",Toast.LENGTH_SHORT).show();
                     }
-
-
-
-
-
-
 
                     if(DEBUG)Log.d(TAG,"Message read");
                     //Toast.makeText(getApplicationContext(),"message Read",Toast.LENGTH_SHORT).show();
@@ -525,8 +562,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         right_foot = (ImageView) findViewById(R.id.right_foot);
 
         //EditTexts
-        sensorNumber = (EditText) findViewById(R.id.editSensorNumber);
-        frequency = (EditText) findViewById(R.id.editFrequency);
+        sensorNumberView = (EditText) findViewById(R.id.editSensorNumber);
+        frequencyView = (EditText) findViewById(R.id.editFrequency);
         send = (Button) findViewById(R.id.sendBtn);
 
         // for new_design
@@ -541,11 +578,11 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         //send.setBackgroundResource(R.drawable.send_selector);
 
         // Battery layouts
-        batteryLevel = (TextView) findViewById(R.id.batteryLevel);
-        battery = (TextView) findViewById(R.id.battery);
+        batteryLevelView = (TextView) findViewById(R.id.batteryLevel);
+        batteryView = (TextView) findViewById(R.id.battery);
         Typeface t = Typeface.createFromAsset(getAssets(),"fonts/Langdon.otf");
-        batteryLevel.setTypeface(t);
-        battery.setTypeface(t);
+        batteryLevelView.setTypeface(t);
+        batteryView.setTypeface(t);
 
         //Gettin bettery info
         if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
@@ -555,8 +592,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
         //Name of the insole
-        insoleName = (TextView) findViewById(R.id.insoleName);
-        insoleName.setText(generateNameBis(nameNumber,insoleSide,footSize));
+        insoleNameView = (TextView) findViewById(R.id.insoleName);
+        insoleNameView.setText(generateNameBis(nameNumber, insoleSide, footSize));
 
 
         //Setting up the timestamp array
@@ -576,52 +613,54 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
         Toast.makeText(getApplicationContext(),"Welcome to the insole simulator",Toast.LENGTH_SHORT).show();
 
 
-        // Setting up the police of "Type of data"
-        typeOfData = (TextView) findViewById(R.id.type_of_data);
+        // Setting up the police of "Type of dataSpinner"
+        typeOfDataView = (TextView) findViewById(R.id.type_of_data);
         Typeface typeface = Typeface.createFromAsset(getAssets(),"fonts/Ailerons.ttf");
-        typeOfData.setTypeface(typeface);
+        typeOfDataView.setTypeface(typeface);
 
         //Setting up the circular progress bar
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
         //Setting up the switch that determines which side of the insole
-        leftRight = (ToggleButton) findViewById(R.id.leftRight);
+        leftRightButton = (ToggleButton) findViewById(R.id.leftRight);
 
-        leftRight.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        leftRightButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 if (isChecked) {
                     if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
                         Toast.makeText(getApplicationContext(), "You can't change the side of the insole while you're paired to a client app", Toast.LENGTH_SHORT).show();
-                        leftRight.setChecked(false);
+                        leftRightButton.setChecked(false);
                     } else {
                         insoleSide = new String("R");
                         right_foot.setBackgroundResource(R.drawable.right_insolefoot);
                         left_foot.setBackgroundResource(R.drawable.left_insolefoot_uncliqued);
-                        //insoleName.setTextColor(Color.parseColor("#fe6b83"));
-                    insName = new String(generateNameBis(nameNumber, insoleSide, footSize));
-                    bluetoothService.setBluetoothServiceName(insName);
-                    //DEVICE_NAME=insName;
-                    insoleName.setText(insName);
+                        //insoleNameView.setTextColor(Color.parseColor("#fe6b83"));
+                        insName = new String(generateNameBis(nameNumber, insoleSide, footSize));
+                        bluetoothService.setBluetoothServiceName(insName);
+                        //DEVICE_NAME=insName;
+                        insoleNameView.setText(insName);
 
-                    Toast.makeText(getApplicationContext(),"You're now a right side insole",Toast.LENGTH_SHORT).show();}
+                        Toast.makeText(getApplicationContext(), "You're now a right side insole", Toast.LENGTH_SHORT).show();
+                    }
 
                 } else {
 
                     if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
                         Toast.makeText(getApplicationContext(), "You can't change the side of the insole while you're paired to a client app", Toast.LENGTH_SHORT).show();
-                        leftRight.setChecked(true);
+                        leftRightButton.setChecked(true);
                     } else {
                         insoleSide = new String("L");
                         right_foot.setBackgroundResource(R.drawable.right_insolefoot_uncliqued);
                         left_foot.setBackgroundResource(R.drawable.left_insolefoot);
-                        //insoleName.setTextColor(Color.parseColor("#2fa8e0"));
-                    insName = new String(generateNameBis(nameNumber, insoleSide, footSize));
-                    bluetoothService.setBluetoothServiceName(insName);
-                    //DEVICE_NAME=insName;
-                    insoleName.setText(insName);
-                    Toast.makeText(getApplicationContext(),"You're now a left side insole",Toast.LENGTH_SHORT).show();}
+                        //insoleNameView.setTextColor(Color.parseColor("#2fa8e0"));
+                        insName = new String(generateNameBis(nameNumber, insoleSide, footSize));
+                        bluetoothService.setBluetoothServiceName(insName);
+                        //DEVICE_NAME=insName;
+                        insoleNameView.setText(insName);
+                        Toast.makeText(getApplicationContext(), "You're now a left side insole", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -631,37 +670,37 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
         //Setting up the spinner
-        data = (Spinner) findViewById(R.id.data);
+        dataSpinner = (Spinner) findViewById(R.id.data);
         ArrayAdapter<CharSequence> dataAdapter = ArrayAdapter.createFromResource(this,R.array.data_type,android.R.layout.simple_spinner_item);
         dataAdapter.setDropDownViewResource(R.layout.spinner_textview);
-        data.setAdapter(dataAdapter);
+        dataSpinner.setAdapter(dataAdapter);
 
         //Setting up the OnItemClickListener for the spinner
 
-        data.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        dataSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 String itemAtPosition = new String(parent.getItemAtPosition(position).toString());
 
                 if (itemAtPosition.equals("Type 1")) {
-                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 1",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of dataSpinner chosen : 1",Toast.LENGTH_SHORT).show();
                     if (DEBUG) Log.i(TAG, "updating to type 1");
                     dataType = 1;
                     if (DEBUG) Log.i(TAG, "Update successful");
                 } else if (itemAtPosition.equals("Type 2")) {
-                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 2",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of dataSpinner chosen : 2",Toast.LENGTH_SHORT).show();
                     if (DEBUG) Log.i(TAG, "updating to type 2");
                     dataType = 2;
                     if (DEBUG) Log.i(TAG, "Update successful");
                 } else if (itemAtPosition.equals("Type 3")) {
-                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 3",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"Type of dataSpinner chosen : 3",Toast.LENGTH_SHORT).show();
                     if (DEBUG) Log.i(TAG, "updating to type 3");
                     dataType = 3;
                     if (DEBUG) Log.i(TAG, "Update successful");
 
-                }else if (itemAtPosition.equals("Type 4")) {
-                    //Toast.makeText(getApplicationContext(),"Type of data chosen : 3",Toast.LENGTH_SHORT).show();
+                } else if (itemAtPosition.equals("Type 4")) {
+                    //Toast.makeText(getApplicationContext(),"Type of dataSpinner chosen : 3",Toast.LENGTH_SHORT).show();
                     if (DEBUG) Log.i(TAG, "updating to type 4");
                     dataType = 4;
                     if (DEBUG) Log.i(TAG, "Update successful");
@@ -681,8 +720,8 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             @Override
             public void onClick(View v) {
 
-                String messageS = sensorNumber.getText().toString();
-                String messageF = frequency.getText().toString();
+                String messageS = sensorNumberView.getText().toString();
+                String messageF = frequencyView.getText().toString();
 
                 sendData(messageS,messageF);
             }
@@ -704,59 +743,64 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
     }
 
 
-    //Method for sending data
+    //Method for sending dataSpinner
 
     public void sendData(String message1, String message2){
 
+        if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED){
+            Toast.makeText(getApplicationContext(),
+                    "The client app needs to be connected first",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
         if (message1.isEmpty() || message2.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequency ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Make sure you enter both the number of sensors and the frequencyView ", Toast.LENGTH_SHORT).show();
         }else {
-            if(bluetoothService.getState() != BluetoothService.STATE_CONNECTED)
-            {Toast.makeText(getApplicationContext(), "The client app needs to be connected first", Toast.LENGTH_SHORT).show();}
-            else{
-                sensorNumber.setFocusable(false);
-                //sensorNumber.setEnabled(false);
+            sensorNumberView.setFocusable(false);
+            //sensorNumberView.setEnabled(false);
 
-                frequency.setFocusable(false);
-                //frequency.setEnabled(false);
-                logic = true;
-                int sensorNbr = Integer.parseInt(message1);
-                int frq = Integer.parseInt(message2);
+            frequencyView.setFocusable(false);
+            //frequencyView.setEnabled(false);
+            logic = true;
+            int sensorNbr = Integer.parseInt(message1);
+            int frq = Integer.parseInt(message2);
 
-                if(DEBUG) Log.i(TAG,"before updating dataProvider");
-                dataProvider = new DataProvider(sensorNbr, frq, dataType);
-                String s = String.valueOf(dataType);
-                if (DEBUG) Log.i(TAG,"Update dataType to "+s);
+            if(DEBUG) Log.i(TAG,"before updating dataProvider");
+            dataProvider = new DataProvider(sensorNbr, frq, dataType);
+            String s = String.valueOf(dataType);
+            if (DEBUG) Log.i(TAG,"Update dataType to "+s);
 
 
-                loop = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-
-
-                            while (dataProvider.getSend() == true) {
-                                int f = dataProvider.getFrequency();
-                                outputStream.reset();
-                                concatByteBis = myByteArrayOutputStream.concatenateTwoBytes(outputStream, concatByte, dataProvider.getData());
-                                /************************************/
-                                //String message = Arrays.toString(dataProvider.getData());
-                                String message = new String(concatByteBis);
-                                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
-                                //d++;
-                                sendMessage(message);
-                                bluetoothService.sleep(1000 / f);
-                            }
+            loop = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (dataProvider.getSend()) {
+                        int f = dataProvider.getFrequency();
+                        outputStream.reset();
+                        try{
+                            outputStream.write(dataProvider.getData());
+                        }catch (IOException e){
+                            Log.w(TAG, "failed to write dataSpinner");
+                            continue;
                         }
+                        /************************************/
+                        //String message = Arrays.toString(dataProvider.getData());
+                        String message = new String(outputStream.toByteArray());
+                        //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                        //d++;
+                        sendMessage(message);
+                        bluetoothService.sleep(1000 / f);
                     }
-                });
-                loop.start();
-                progressBar.setVisibility(View.VISIBLE);
-                // clear EditTexts
-                sensorNumber.setText("");
-                frequency.setText("");
+                }
+            });
+            loop.start();
+            progressBar.setVisibility(View.VISIBLE);
+            // clear EditTexts
+            sensorNumberView.setText("");
+            frequencyView.setText("");
 
-            }
         }
 
 
@@ -766,18 +810,18 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
 
 
-    //Method for stopping data
+    //Method for stopping dataSpinner
     public void stopData(){
 
         if(logic == true)
 
         {dataProvider.abortSend();
 
-            sensorNumber.setFocusableInTouchMode(true);
-            //sensorNumber.setEnabled(true);
+            sensorNumberView.setFocusableInTouchMode(true);
+            //sensorNumberView.setEnabled(true);
 
-            frequency.setFocusableInTouchMode(true);
-            //frequency.setEnabled(true);
+            frequencyView.setFocusableInTouchMode(true);
+            //frequencyView.setEnabled(true);
             d=0;
             if(DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
             loop.interrupt();
@@ -787,7 +831,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
             logic=!logic;
         }else{
-            Toast.makeText(getApplicationContext(),"There is no stream of data to be stopped",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"There is no stream of dataSpinner to be stopped",Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -806,7 +850,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             bluetoothService.write(send);
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            //sensorNumber.setText(mOutStringBuffer);
+            //sensorNumberView.setText(mOutStringBuffer);
         }
     }
 
@@ -866,7 +910,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
     /*--- For receiving the new name ---*/
     @Override
-    public void NameMessage(int nbr,String s,int foot) {
+    public void nameMessage(int nbr, String s, int foot) {
 
         if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
             Toast.makeText(this,"You can't change the name of the insole simulator while you're paired with a client app", Toast.LENGTH_SHORT).show();
@@ -882,14 +926,14 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             if(s.equals("R"))
             {
                 if(DEBUG) Log.i(TAG, "right");
-                leftRight.setChecked(true);
+                leftRightButton.setChecked(true);
             }else if(s.equals("L"))
             {
                 if(DEBUG) Log.i(TAG, "left");
-                leftRight.setChecked(false);
+                leftRightButton.setChecked(false);
             }
             //DEVICE_NAME=n;
-            insoleName.setText(insName);
+            insoleNameView.setText(insName);
             Toast.makeText(getApplicationContext(),"The name of the insole has changed to "+insName,Toast.LENGTH_SHORT).show();
         }
 
@@ -897,13 +941,13 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
     /*--- For receiving the new version ---*/
     @Override
-    public void VersionMessage(String message) {
+    public void versionMessage(String message) {
 
     }
 
     /*--- For receiving the new footsize ---*/
     @Override
-    public void FootsizeMessage(int intFoot) {
+    public void footsizeMessage(int intFoot) {
 
         if (bluetoothService.getState() == BluetoothService.STATE_CONNECTED) {
             Toast.makeText(this,"You can't change the name of the foot size while you're paired with a client app", Toast.LENGTH_SHORT).show();
@@ -913,7 +957,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             insName= stringBuilder.append("FeetMe ").append(String.valueOf(nameNumber)).append(insoleSide).append("-").append(footSize).toString();
             bluetoothService.setBluetoothServiceName(insName);
             //DEVICE_NAME=name;
-            insoleName.setText(insName);
+            insoleNameView.setText(insName);
             Toast.makeText(getApplicationContext(),"footsize of the insole has changed to "+footSize,Toast.LENGTH_SHORT).show();
         }
 
