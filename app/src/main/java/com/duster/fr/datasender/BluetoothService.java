@@ -250,9 +250,6 @@ public class BluetoothService {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();
                     Log.d(TAG, "send Message disconnection");
-
-                    mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
-                    BluetoothService.this.disconnect();
                 }
             }
         }
@@ -266,7 +263,10 @@ public class BluetoothService {
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e("writing", "unable to write data in the device", e);
-                cancel();
+                mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
+                BluetoothService.this.disconnect();
+                //added in 30th
+                BluetoothService.this.accept();
             }
 
         }

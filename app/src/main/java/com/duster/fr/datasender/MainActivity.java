@@ -236,14 +236,13 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     else if(readMessage.equals("version")) {
 
                         numData = (byte) 3;
-                        rBytes = version;
 
                         // Concatenation of the three arrays
                         outputStream.reset();
                         try {
                             outputStream.write(numData);
                             outputStream.write(timeStamp);
-                            outputStream.write(rBytes);
+                            outputStream.write(version);
                         } catch (IOException e) {
                             Log.w(TAG, "write failure");
                             break;
@@ -541,6 +540,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                 case MESSAGE_DISC:
                     if(DEBUG) Log.d(TAG, "message of disconnecting");
                     dataProvider.abortSend();
+                    progressBar.setVisibility(View.INVISIBLE);
 
                     break;
             }
