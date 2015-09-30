@@ -389,16 +389,24 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
                     return true;
                 }
             case R.id.action_disconnect:
+                if(bluetoothService.getState()==BluetoothService.STATE_CONNECTED){
+                    bluetoothService.disconnect();
+                    EditorsEnabled(true);
 
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"You're not connected to any app, chill",Toast.LENGTH_SHORT).show();
+                }
+                return true;
 
-                bluetoothService.disconnect();
-                EditorsEnabled(true);
 
             case R.id.action_restart_app:
+
                 Intent i = getBaseContext().getPackageManager()
                         .getLaunchIntentForPackage( getBaseContext().getPackageName() );
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
