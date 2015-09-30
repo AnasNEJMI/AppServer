@@ -5,12 +5,18 @@
 
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:icon="@drawable/settings"
         app:showAsAction="always" />
 
     <item android:id="@+id/action_make_discoverable"
         android:icon="@drawable/enable_bluetooth4"
+        android:title="@string/action_make_discoverable"
+        android:orderInCategory="2"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/action_make_hidden"
+        android:icon="@drawable/enable_bluetooth22"
         android:title="@string/action_make_discoverable"
         android:orderInCategory="1"
         app:showAsAction="always" />
