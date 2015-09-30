@@ -388,9 +388,17 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
 
                     return true;
                 }
-            case R.id.action_make_hidden:
+            case R.id.action_disconnect:
+
+
                 bluetoothService.disconnect();
                 EditorsEnabled(true);
+
+            case R.id.action_restart_app:
+                Intent i = getBaseContext().getPackageManager()
+                        .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);
@@ -407,8 +415,7 @@ public class MainActivity extends ActionBarActivity implements SettingsFragment.
             Toast.makeText(this,"You can't change the name of the insole simulator" +
                     " while you're paired with a client app", Toast.LENGTH_SHORT)
                     .show();
-        }
-        else{
+        } else {
             footSize=foot;
             nameNumber=nbr;
             insoleSide=s;

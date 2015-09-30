@@ -7,8 +7,8 @@
 
     <string name="action_make_discoverable">enable BT connection</string>
     <string name="action_make_hidden">stop BT availability</string>
-    <string name="action_send">Send</string>
-    <string name="action_change">Change</string>
+    <string name="action_restart_app">Send</string>
+    <string name="action_disconnect">Change</string>
     <string name="not_connected">Not connected</string>
 
     <string-array name="data_type">

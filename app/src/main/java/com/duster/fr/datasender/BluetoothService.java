@@ -135,7 +135,7 @@ public class BluetoothService {
     }
 
     private synchronized void stop() {
-        Log.d(TAG, "stop");
+        if(MainActivity.DEBUG)Log.d(TAG, "stop");
         if (mAcceptThread != null) {
             mAcceptThread.cancel();
             mAcceptThread = null;
@@ -169,7 +169,7 @@ public class BluetoothService {
 
     /* Starting the thread to enable connection to device*/
     public synchronized void accept() {
-        Log.d(TAG, "accept");
+        if(MainActivity.DEBUG)Log.d(TAG, "accept");
         stop();
         mAcceptThread = new AcceptThread();
         mAcceptThread.start();
@@ -178,7 +178,7 @@ public class BluetoothService {
     /*Starting the tread to manage the connection and enable transmissions*/
 
     public synchronized void Connected(BluetoothSocket socket,BluetoothDevice device) {
-        Log.d(TAG, "connected");
+        if(MainActivity.DEBUG)Log.d(TAG, "connected");
         stop();
 
         mConnectedThread = new ConnectedThread(socket, mHandler);
@@ -231,7 +231,7 @@ public class BluetoothService {
                 try {
                     mbtSocket = mmServerSocket.accept(); // listening to connection requests
                     // not to be used in the main thread ( because it's a blocking call)
-                    Log.i(TAG, "connection accepted");
+                    if(MainActivity.DEBUG)Log.i(TAG, "connection accepted");
                     mmServerSocket.close(); // Used to not accept additional connections
 
                 } catch (IOException connectException) {
