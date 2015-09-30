@@ -534,6 +534,10 @@ public class BluetoothService {
                                     .sendToTarget();
                         }
 
+                        /*-------------------------------------------*/
+                        /* --- If requested to start sending data ---*/
+                        /*-------------------------------------------*/
+
                         else if(message.equals("start_sending")){
                             numData = (byte) 10;
                             rBytes = "start".getBytes();
@@ -558,6 +562,10 @@ public class BluetoothService {
 
                         }
 
+                        /*-------------------------------------------*/
+                        /* --- If requested to stop sending data ---*/
+                        /*-------------------------------------------*/
+
                         else if(message.equals("stop_sending")){
                             numData = (byte) 11;
                             rBytes = "stop".getBytes();
@@ -581,6 +589,10 @@ public class BluetoothService {
 
                         }
 
+                        /*----------------------------------------------------------*/
+                        /* --- If requested to make the thread enter a deep mode ---*/
+                        /*----------------------------------------------------------*/
+
                         else if(message.equals("stop")){
                             if(MainActivity.DEBUG) Log.d(TAG,"The BT service enters a sleep mode");
                             try {
@@ -594,6 +606,11 @@ public class BluetoothService {
                                     .sendToTarget();
 
                         }
+
+                        /*----------------------------------------*/
+                        /* --- If requested to reset timestamp ---*/
+                        /*----------------------------------------*/
+
                         else if(message.equals("reset_timestamp")){
                             if(MainActivity.DEBUG) Log.i(TAG,"timestamp");
                             numData = (byte) 5;
@@ -612,9 +629,17 @@ public class BluetoothService {
                                     .sendToTarget();
 
                         }
+                        /*----------------------------------------*/
+                        /* --- If request is the hello message ---*/
+                        /*----------------------------------------*/
+
                         else if(message.contains("#")){
                             if (MainActivity.DEBUG)Log.d(TAG, "Hello message received");
                         }
+
+                        /*-----------------------------------*/
+                        /* --- If request is unidentified ---*/
+                        /*-----------------------------------*/
 
 
                         else{
