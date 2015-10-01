@@ -264,7 +264,8 @@ public class BluetoothService {
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e("writing", "unable to write data in the device", e);
-                cancel();
+                mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
+                BluetoothService.this.disconnect();
             }
 
         }
