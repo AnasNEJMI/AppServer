@@ -11,9 +11,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 //import java.util.logging.Handler;
@@ -41,17 +43,85 @@ public class BluetoothService {
     private ConnectedThread mConnectedThread;
     private AcceptThread mAcceptThread;
 
+    //data sent back to the apps
+    private byte numData;
+    private byte[] timeStamp = new byte[4];
+    private byte[] version = new byte[]{1,0};
+
+    //data about the insole
+    private String side="L";
+    private int sensorNb;
+    private int frequency;
+    private int dataType;
+    private int footSize;
+    private int nameParam1;
+    private int nameParam2;
+    private String btName;
+    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private byte[] rBytes;
+    private int batInt;
+    private DataProvider dataProvider;
+
+    //Secondary thread
+    private Thread loop;
+
+    //Setting up the timestamp array
+    private String date = new SimpleDateFormat("dd,MM,yyyy,HH,mm,ss").format(new java.util.Date());
+    private String[] dateParts = date.split(",");
+
+
+
+
+
+
+    // Boolean to not allow abort button to do more than aborting
+    private boolean isSendingData =false;
+
+
     private MainActivity activity;
     int testInt;
 
-    public BluetoothService(Handler handler, MainActivity activity) {
+    public BluetoothService(String s,Handler handler, MainActivity activity) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = handler;
         this.activity = activity;
+        side=s;
     }
+
+    public synchronized void setSide(String s){
+        side = s;
+    }
+    public synchronized void setSensorNb(int nb){
+        sensorNb = nb;
+    }
+
+    public synchronized void setFrequency(int fr){
+        frequency = fr;
+    }
+
+    public synchronized void setFootSize(int fs){
+        footSize = fs;
+    }
+    public synchronized void setBatteryLevel(int batt){
+        batInt = batt;
+    }
+    public synchronized void setType(int type){
+        dataType = type;
+    }
+
     public void setBluetoothServiceName(String s){
         mAdapter.setName(s);
     }
+
+    public String getBluetoothServiceName(){
+        return mAdapter.getName();
+    }
+
+
+
+
+
+
 
     private synchronized void setState(int state){
         if(MainActivity.DEBUG) Log.d(TAG, "setState" + mState +"-->"+state);
@@ -63,7 +133,7 @@ public class BluetoothService {
     }
 
     private synchronized void stop() {
-        Log.d(TAG, "stop");
+        if(MainActivity.DEBUG)Log.d(TAG, "stop");
         if (mAcceptThread != null) {
             mAcceptThread.cancel();
             mAcceptThread = null;
@@ -97,7 +167,7 @@ public class BluetoothService {
 
     /* Starting the thread to enable connection to device*/
     public synchronized void accept() {
-        Log.d(TAG, "accept");
+        if(MainActivity.DEBUG)Log.d(TAG, "accept");
         stop();
         mAcceptThread = new AcceptThread();
         mAcceptThread.start();
@@ -106,13 +176,15 @@ public class BluetoothService {
     /*Starting the tread to manage the connection and enable transmissions*/
 
     public synchronized void Connected(BluetoothSocket socket,BluetoothDevice device) {
-        Log.d(TAG, "connected");
+        if(MainActivity.DEBUG)Log.d(TAG, "connected");
         stop();
 
         mConnectedThread = new ConnectedThread(socket, mHandler);
         mConnectedThread.start();
-        Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME, device.getName());
-        mHandler.sendMessage(msg);
+        mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME,"Connected to -> "+device.getName()).sendToTarget();
+        //Message msg = mHandler.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME, device.getName());
+        //mHandler.sendMessage(msg);
+
         setState(STATE_CONNECTED);
 
     }
@@ -157,7 +229,7 @@ public class BluetoothService {
                 try {
                     mbtSocket = mmServerSocket.accept(); // listening to connection requests
                     // not to be used in the main thread ( because it's a blocking call)
-                    Log.i(TAG, "connection accepted");
+                    if(MainActivity.DEBUG)Log.i(TAG, "connection accepted");
                     mmServerSocket.close(); // Used to not accept additional connections
 
                 } catch (IOException connectException) {
@@ -172,6 +244,7 @@ public class BluetoothService {
                 }
                 if (mbtSocket != null) {
                     BluetoothService.this.Connected(mbtSocket, mbtSocket.getRemoteDevice());
+                    //if (MainActivity.DEBUG) Log.d(TAG, mbtSocket.getRemoteDevice().getName());
                 }
 
         }
@@ -181,7 +254,7 @@ public class BluetoothService {
                 mmServerSocket.close();
                 mbtSocket=null;
             } catch (IOException e) {
-                Log.i(TAG,"The socket couldn't be closed",e);
+                Log.i(TAG, "The socket couldn't be closed", e);
             }
         }
     }
@@ -226,18 +299,356 @@ public class BluetoothService {
         }
 
         public void run() {
+            byte t0 = (byte) Integer.parseInt(dateParts[0]);
+            byte t1 = (byte) Integer.parseInt(dateParts[1]);
+            byte t2 = (byte) Integer.parseInt(dateParts[2].substring(0,2));
+            byte t3 = (byte) Integer.parseInt(dateParts[2].substring(2,4));
+            timeStamp[0] = (byte) t0;
+            timeStamp[1] = (byte) t1;
+            timeStamp[2] = (byte) t2;
+            timeStamp[3] = (byte) t3;
+
+            /*----------------------------------------------------------*/
+            /* --- once connection is established, send a message ------*/
+            /*----------------------------------------------------------*/
+
+            numData = (byte) 14;
+            rBytes= "madm".getBytes();
+
+            // Concatenation of the three arrays and sending dataSpinner
+            outputStream.reset();
+            try {
+                outputStream.write(numData);
+                outputStream.write(rBytes);
+            } catch (IOException e) {
+                Log.w(TAG, "write failure");
+            }
+            write(outputStream.toByteArray());
+
             running = true;
             if(MainActivity.DEBUG) Log.i(TAG,"Begin mConnected");
             int bytes =0;
             byte[] buffer = new byte[1024];
             send = false;
             testInt = 0;
+            String message;
             while(running) {
                 try {
 
                     if(mmInStream.available() > 0) {
                         bytes = mmInStream.read(buffer);
-                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+
+                        message = new String(buffer,0,bytes);
+
+                        //Deciding what to do with data
+
+                        /*-----------------------*/
+                        /* --- If it's a ping ---*/
+                        /*-----------------------*/
+
+                        if(message.equals("ping")) {
+                            // Setting up the three byte arrays for the response
+                            numData = (byte) 1;
+                            rBytes = "pong".getBytes();
+                            // Concatenation of the three arrays and sending dataSpinner
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+
+                            write(outputStream.toByteArray());
+                        }
+                        /*------------------------------------------------*/
+                        /* --- If data requested is the version ---*/
+                        /*------------------------------------------------*/
+
+                        else if(message.equals("version")){
+
+                            numData = (byte) 3;
+
+                            // Concatenation of the three arrays
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(version);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            if(MainActivity.DEBUG) Log.d(TAG,"version of the insole is sent");
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"The version of the" +
+                                    "app has been requested")
+                                    .sendToTarget();
+
+                        }
+
+                        /*----------------------------------------------------*/
+                        /* --- If data requested is the side of the insole ---*/
+                        /*----------------------------------------------------*/
+                        else if(message.equals("insole_side")){
+                            numData = (byte) 4;
+                            rBytes = side.getBytes();
+
+                            // Concatenation of the three arrays and sending response
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"the client " +
+                                    "app is requesting which side is the insole")
+                                    .sendToTarget();
+                        }
+
+                        /*--------------------------------------------------*/
+                        /* --- If data requested is the number of sensor ---*/
+                        /*--------------------------------------------------*/
+
+                        else if(message.equals("sensors_number")){
+
+                            numData = (byte) 2;
+                            rBytes = new byte[]{(byte) sensorNb};
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"the client" +
+                                    " app is requesting the number of sensors of the insole")
+                                    .sendToTarget();
+                        }
+
+                        /*--------------------------------------------------*/
+                        /* --- If data requested is the footsize ---*/
+                        /*--------------------------------------------------*/
+
+                        else if(message.equals("footsize")){
+
+                            numData = (byte) 8;
+                            rBytes = new byte[]{(byte) footSize};
+
+                            // Concatenation of the three arrays
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"the client" +
+                                    " app is requesting the size of the foot")
+                                    .sendToTarget();
+
+
+                        }
+
+                        /*------------------------------------------------------*/
+                        /* --- If the request is to change the insole's name--- */
+                        /*------------------------------------------------------*/
+
+                        else if(message.length()==10 &&message.toLowerCase().contains("new_name".
+                                toLowerCase()) ){
+
+                            if(message.charAt(8) == (int) message.charAt(8) &&
+                                    message.charAt(9) == (int) message.charAt(9)){
+
+                                nameParam1 =  Integer.parseInt(String.valueOf(message.charAt(8)));
+                                nameParam2 = Integer.parseInt(String.valueOf(message.charAt(9)));
+
+                                activity.runOnUiThread(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        btName=activity.generateName(nameParam1,
+                                                nameParam2, side, footSize);
+                                        activity.setName(btName);
+                                        setBluetoothServiceName(btName);
+                                    }
+                                });
+
+                                numData = (byte) 12;
+                                rBytes = "name".getBytes();
+                                try {
+                                    outputStream.write(numData);
+                                    outputStream.write(timeStamp);
+                                    outputStream.write(rBytes);
+                                } catch (IOException e) {
+                                    Log.w(TAG, "write failure");
+                                    break;
+                                }
+                                write(outputStream.toByteArray());
+                                mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"The " +
+                                        "name has been changed")
+                                        .sendToTarget();
+                            }
+                        }
+
+                        /*--------------------------------------------------------*/
+                        /* --- If it is a request is to inspect the battery level-- */
+                        /*--------------------------------------------------------*/
+
+                        else if(message.equals("battery_info")){
+                            if(MainActivity.DEBUG) Log.i(TAG,"battery");
+                            numData = (byte) 6;
+                            rBytes = new byte[40];
+                            rBytes[4] = (byte)((batInt*10)%256);
+                            rBytes[5] = (byte)(batInt*10/256);
+
+                            outputStream.reset();
+
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"The " +
+                                    "battery level has been requested")
+                                    .sendToTarget();
+                        }
+
+                        /*-------------------------------------------*/
+                        /* --- If requested to start sending data ---*/
+                        /*-------------------------------------------*/
+
+                        else if(message.equals("start_sending")){
+                            numData = (byte) 10;
+                            rBytes = "start".getBytes();
+
+
+                            // Concatenation of the three arrays and sending response
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"the request to " +
+                                    "start sending is received")
+                                    .sendToTarget();
+
+                            sendData();
+
+                        }
+
+                        /*-------------------------------------------*/
+                        /* --- If requested to stop sending data ---*/
+                        /*-------------------------------------------*/
+
+                        else if(message.equals("stop_sending")){
+                            numData = (byte) 11;
+                            rBytes = "stop".getBytes();
+
+                            // Concatenation of the three arrays and sending response
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                                outputStream.write(rBytes);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"The client " +
+                                    "app is requesting to stop sending data")
+                                    .sendToTarget();
+
+                            BluetoothService.this.stopData();
+
+                        }
+
+                        /*----------------------------------------------------------*/
+                        /* --- If requested to make the thread enter a deep mode ---*/
+                        /*----------------------------------------------------------*/
+
+                        else if(message.equals("stop")){
+                            if(MainActivity.DEBUG) Log.d(TAG,"The BT service enters a sleep mode");
+                            try {
+                                Thread.currentThread().sleep(10000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (MainActivity.DEBUG) Log.i(TAG, "The BT service slept well");
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"The BT service" +
+                                    " slept well !")
+                                    .sendToTarget();
+
+                        }
+
+                        /*----------------------------------------*/
+                        /* --- If requested to reset timestamp ---*/
+                        /*----------------------------------------*/
+
+                        else if(message.equals("reset_timestamp")){
+                            if(MainActivity.DEBUG) Log.i(TAG,"timestamp");
+                            numData = (byte) 5;
+
+                            outputStream.reset();
+                            try {
+                                outputStream.write(numData);
+                                outputStream.write(timeStamp);
+                            } catch (IOException e) {
+                                Log.w(TAG, "write failure");
+                                break;
+                            }
+                            write(outputStream.toByteArray());
+                            if (MainActivity.DEBUG) Log.i(TAG, "The BT service slept well");
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST, "Timestamp reset")
+                                    .sendToTarget();
+
+                        }
+                        /*----------------------------------------*/
+                        /* --- If request is the hello message ---*/
+                        /*----------------------------------------*/
+
+                        else if(message.contains("#")){
+                            if (MainActivity.DEBUG)Log.d(TAG, "Hello message received");
+                        }
+
+                        /*-----------------------------------*/
+                        /* --- If request is unidentified ---*/
+                        /*-----------------------------------*/
+
+
+                        else{
+                            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST, "Request unrecognized")
+                                    .sendToTarget();
+                        }
+
+
+
+
+
                     }else{
                         try {
                             Thread.sleep(50);
@@ -248,9 +659,8 @@ public class BluetoothService {
 
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
-                    Log.d(TAG, "send Message disconnection");
-                    mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
                     BluetoothService.this.disconnect();
+                    Log.d(TAG, "send Message disconnection");
                 }
             }
         }
@@ -264,8 +674,19 @@ public class BluetoothService {
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e("writing", "unable to write data in the device", e);
-                mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
+                //mHandler.obtainMessage(MainActivity.MESSAGE_DISC).sendToTarget();
+                activity.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        activity.EditorsEnabled(true);
+                    }
+                });
+                dataProvider.abortSend();
                 BluetoothService.this.disconnect();
+                //added in 30th
+                //makeDiscoverable(activity);
+                BluetoothService.this.accept();
             }
 
         }
@@ -307,5 +728,83 @@ public class BluetoothService {
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
         activity.startActivity(discoverableIntent);
     }
+
+    protected void sendData(){
+        if(this.getState() != BluetoothService.STATE_CONNECTED){
+            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST,"you need to be connected first")
+                    .sendToTarget();
+            return;
+        }
+
+        isSendingData = true;
+
+        activity.runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                activity.EditorsEnabled(false);
+            }
+        });
+
+        if(MainActivity.DEBUG) Log.i(TAG,"before updating dataProvider");
+        dataProvider = new DataProvider(sensorNb, frequency, dataType);
+
+        if(MainActivity.DEBUG) {;
+            Log.d(TAG, String.valueOf(sensorNb));
+            Log.d(TAG, String.valueOf(frequency));
+            Log.d(TAG, String.valueOf(dataType));
+        }
+        //String s = String.valueOf(dataType);
+        //if (MainActivity.DEBUG) Log.i(TAG,"Update dataType to "+s);
+
+        loop = new Thread() {
+            @Override
+            public void run() {
+                while (dataProvider.getSend()) {
+                    outputStream.reset();
+                    try {
+                        outputStream.write(dataProvider.getData());
+                        if(MainActivity.DEBUG){
+                            Log.d(TAG,String.valueOf(dataProvider.getData().length));
+                        }
+                    } catch (IOException e) {
+                        Log.w(TAG, "failed to write dataSpinner");
+                        continue;
+                    }
+                    write(outputStream.toByteArray());
+                    try {
+                        sleep(1000 / frequency);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        loop.start();
+    }
+
+
+    protected void stopData(){
+        if(isSendingData) {
+
+            activity.runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    activity.EditorsEnabled(true);
+                }
+            });
+            dataProvider.abortSend();
+            if(MainActivity.DEBUG){Log.d(TAG,"Trying to interrupt the loop");}
+            if(MainActivity.DEBUG){Log.d(TAG,"Trying Interruption successful");}
+            isSendingData =false;
+        }else{
+
+            mHandler.obtainMessage(MainActivity.MESSAGE_TOAST, "There is no stream of data" +
+                    "to be stopped")
+                    .sendToTarget();
+        }
+    }
+
 
 }

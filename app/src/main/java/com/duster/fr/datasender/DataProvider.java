@@ -67,6 +67,7 @@ public class DataProvider {
 
     }
 
+    // add volatile variable
     /*--For Send--*/
     public  void abortSend(){
         send = false;
@@ -85,7 +86,6 @@ public class DataProvider {
         int middleSensors = sensorNumberDividable/3;
         int backSensors = sensorNumberDividable/3;
         data = new byte[sensorNumber+OVERHEAD];
-
         data[0]=(byte)0;
         data[1]=29;
         data[2]=9;
@@ -93,22 +93,26 @@ public class DataProvider {
         data[4]=15;
 
         if(dataType == 1) {
-            Log.i(TAG,"data type ==1");
+            //Log.i(TAG,"data type ==1");
 
-            for (int j = 0; j < frontSensors; j++) {
-                Random rand = new Random();
-                data[j+OVERHEAD] = (byte) (100 + rand.nextInt((10 - 1) + 1));
-            }
-            for (int j = 0; j < middleSensors; j++) {
-                Random rand = new Random();
-                data[j+OVERHEAD+frontSensors] = (byte) (40+ rand.nextInt((20 - 1) + 1));
-            }
-            for (int j = 0; j < backSensors; j++) {
-                Random rand = new Random();
-                data[j+OVERHEAD+frontSensors+middleSensors] = (byte) (0+ rand.nextInt((10 - 1) + 1));
+            if(dataType == 1) {
+                //Log.i(TAG,"data type ==2");
+                for (int j = 0; j < frontSensors; j++) {
+                    Random rand = new Random();
+                    data[j+OVERHEAD] = (byte) (200 + rand.nextInt((10 - 1) + 1));
+                }
+                for (int j = 0; j < middleSensors; j++) {
+                    Random rand = new Random();
+                    data[j+OVERHEAD+frontSensors] = (byte) (200+ rand.nextInt((20 -(-5)) + (-5)));
+                }
+                for (int j = 0; j < backSensors; j++) {
+                    Random rand = new Random();
+                    data[j+OVERHEAD+frontSensors+middleSensors] = (byte) (200+ rand.nextInt((10 - 1) + 1));
+                }
+
             }
         }else if(dataType == 2) {
-            Log.i(TAG,"data type ==2");
+            //Log.i(TAG,"data type ==2");
             for (int j = 0; j < frontSensors; j++) {
                 Random rand = new Random();
                 data[j+OVERHEAD] = (byte) (70 + rand.nextInt((10 - 1) + 1));
@@ -123,7 +127,7 @@ public class DataProvider {
             }
 
         }else if(dataType==3){
-            Log.i(TAG,"data type ==3");
+            //Log.i(TAG,"data type ==3");
             for (int j = 0; j < frontSensors; j++) {
                 Random rand = new Random();
                 data[j+OVERHEAD] = (byte) (0 + rand.nextInt((10 - 1) + 1));
@@ -139,7 +143,7 @@ public class DataProvider {
         }
 
         else if(dataType==4){
-            Log.i(TAG,"data type ==4");
+            //Log.i(TAG,"data type ==4");
             for (int j = 0; j<sensorNumber; j++) {
 
                 data[j+OVERHEAD] = (byte) 15;
