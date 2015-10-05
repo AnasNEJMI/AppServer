@@ -241,13 +241,8 @@ public class BluetoothService {
             testInt = 0;
             while(true) {
                 try {
-                    b = mmInStream.available();
-                    if (b > 0) {
-                        bytes = mmInStream.read(buffer, 0, b);
-                        mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-                    } else {
-                        //Log.i(TAG,"no stream found");
-                    }
+                    bytes = mmInStream.read(buffer, 0, b);
+                    mHandler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     if (MainActivity.DEBUG) Log.e(TAG, "disconnected", e);
                     BluetoothService.this.disconnect();
