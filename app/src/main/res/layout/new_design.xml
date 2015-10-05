@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondvide_small">
+
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/app_icon"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/app_icon_background"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <ImageButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/app_server_icon"
+        android:background="@drawable/app_server_icon"
+        android:layout_marginBottom="20dp"
+        android:layout_alignBottom="@+id/app_icon"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FeetMe 245L-44 (A.N)"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="#8ebdee"
+        android:id="@+id/insoleName"
+        android:layout_below="@+id/app_icon"
+        android:layout_centerHorizontal="true" />
+
+    <ToggleButton
+        android:layout_width="75dp"
+        android:layout_height="35dp"
+        android:id="@+id/leftRight"
+        android:background="@drawable/toggle_switch"
+        android:textOff=""
+        android:textOn=""
+        android:layout_alignBottom="@+id/left_foot"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="22dp"
+        android:layout_height="55dp"
+        android:id="@+id/left_foot"
+        android:background="@drawable/left_insolefoot"
+        android:layout_below="@+id/insoleName"
+        android:layout_toLeftOf="@+id/app_icon"
+        android:layout_toStartOf="@+id/app_icon"/>
+
+
+    <ImageView
+        android:layout_width="22dp"
+        android:layout_height="55dp"
+        android:id="@+id/right_foot"
+        android:background="@drawable/right_insolefoot_uncliqued"
+        android:layout_below="@+id/insoleName"
+        android:layout_above="@+id/data_background"
+        android:layout_toRightOf="@+id/app_icon"
+        android:layout_toEndOf="@+id/app_icon" />
+
+    <ImageView
+        android:layout_width="350dp"
+        android:layout_height="265dp"
+        android:id="@+id/data_background"
+        android:background="@drawable/data_background"
+        android:layout_below="@+id/left_foot"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="49dp"
+        android:id="@+id/sensor_icon"
+        android:background="@drawable/sensor_icon2"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_alignTop="@+id/data_background"
+        android:layout_toLeftOf="@+id/left_foot"
+        android:layout_toStartOf="@+id/left_foot" />
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="49dp"
+        android:layout_marginLeft="20dp"
+        android:id="@+id/frequency_icon"
+        android:background="@drawable/frequency_icon2"
+        android:layout_below="@+id/sensor_icon"
+        android:layout_toLeftOf="@+id/left_foot"
+        android:layout_toStartOf="@+id/left_foot" />
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="49dp"
+        android:id="@+id/data_type_icon"
+        android:background="@drawable/data_type_icon"
+        android:layout_below="@+id/frequency_icon"
+        android:layout_alignLeft="@+id/frequency_icon"
+        android:layout_alignStart="@+id/frequency_icon"
+        android:layout_toLeftOf="@+id/editFrequency"
+        android:layout_toStartOf="@+id/editFrequency" />
+
+    <EditText
+        android:layout_width="235dp"
+        android:layout_height="49dp"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editSensorNumber"
+        android:textColor="#247aa1"
+        android:layout_alignTop="@+id/sensor_icon"
+        android:layout_toRightOf="@+id/sensor_icon"
+        android:background="@drawable/text_field"
+        android:gravity="center"
+        android:hint="Number of sensors"
+        android:layout_marginBottom="10dp"
+        android:textColorHint="@drawable/sensor_selector"
+        android:layout_alignRight="@+id/editFrequency"
+        android:layout_alignEnd="@+id/editFrequency" />
+
+    <EditText
+        android:layout_width="235dp"
+        android:layout_height="49dp"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editFrequency"
+        android:layout_alignTop="@+id/frequency_icon"
+        android:layout_toRightOf="@+id/frequency_icon"
+        android:background="@drawable/text_field"
+        android:hint="Frequency"
+        android:gravity="center"
+        android:layout_marginBottom="10dp"
+        android:textColor="#247aa1"
+        android:textColorHint="@drawable/sensor_selector"
+        android:layout_alignRight="@+id/abortBtn"
+        android:layout_alignEnd="@+id/abortBtn" />
+
+    <Spinner
+        android:layout_width="235dp"
+        android:layout_height="49dp"
+        android:paddingLeft="20dp"
+        android:id="@+id/data"
+        android:layout_gravity="center"
+        android:layout_below="@+id/frequency_icon"
+        android:layout_toRightOf="@+id/data_type_icon"
+        android:background="@drawable/data_type2"
+        android:layout_alignBottom="@+id/data_type_icon"
+        android:layout_alignRight="@+id/editFrequency"
+        android:layout_alignEnd="@+id/editFrequency" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/type_of_data"/>
+
+    <Button
+        android:layout_width="110dp"
+        android:layout_height="35dp"
+        android:id="@+id/sendBtn"
+        android:background="@drawable/start"
+        android:layout_alignTop="@+id/progressBar"
+        android:layout_alignLeft="@+id/data_type_icon"
+        android:layout_alignStart="@+id/data_type_icon" />
+
+    <Button
+        android:layout_width="110dp"
+        android:layout_height="35dp"
+        android:id="@+id/abortBtn"
+        android:background="@drawable/stop"
+        android:layout_below="@+id/data"
+        android:layout_alignLeft="@+id/right_foot"
+        android:layout_alignStart="@+id/right_foot"
+        android:layout_marginTop="21dp" />
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_alignBottom="@+id/abortBtn"
+        android:layout_toRightOf="@+id/sendBtn"
+        android:layout_toLeftOf="@+id/abortBtn"
+        android:padding="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignTop="@+id/abortBtn" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BATTERY LEVEL"
+        android:textSize="15sp"
+        android:id="@+id/batteryLevel"
+        android:textColor="#697892"
+        android:paddingLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_below="@+id/data_background"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/data_background"
+        android:layout_alignStart="@+id/data_background" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#687791"
+        android:textSize="15sp"
+        android:id="@+id/battery"
+        android:paddingLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_below="@+id/data_background"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/batteryLevel"
+        android:layout_toRightOf="@+id/batteryLevel"
+        android:layout_toEndOf="@+id/batteryLevel" />
+
+
+</RelativeLayout>
